@@ -34,7 +34,7 @@
             android:layout_marginStart="68dp"
             android:layout_marginTop="450dp"
             android:layout_marginEnd="68dp"
-            android:text="Welcome to Gainly!"
+            android:text="Login to your Account"
             android:textColor="#FBFBFB"
             android:textSize="38sp"
             android:textStyle="bold"
@@ -48,33 +48,57 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="96dp"
             android:layout_marginEnd="96dp"
-            android:text="your fitness journey starts here"
+            android:text="and start working out!"
             android:textColor="@color/white"
-            android:textSize="20sp"
+            android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/titleTxv" />
 
-        <TextView
-            android:id="@+id/choiceTxv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="110dp"
-            android:layout_marginTop="41dp"
-            android:layout_marginEnd="110dp"
-            android:text="Register or Login with an email:"
-            android:textColor="@color/white"
-            android:textStyle="italic"
+        <EditText
+            android:id="@+id/emailEt"
+            android:layout_width="270dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="70dp"
+            android:layout_marginTop="42dp"
+            android:layout_marginEnd="71dp"
+            android:background="@drawable/white_rectangle_border"
+            android:ems="10"
+            android:hint="Email address"
+            android:inputType="textEmailAddress"
+            android:textAlignment="textStart"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#73FFFFFF"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/descTxv" />
 
+        <EditText
+            android:id="@+id/passwordEt"
+            android:layout_width="270dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="70dp"
+            android:layout_marginTop="13dp"
+            android:layout_marginEnd="71dp"
+            android:background="@drawable/white_rectangle_border"
+            android:ems="10"
+            android:hint="Password"
+            android:inputType="textVisiblePassword"
+            android:textAlignment="textStart"
+            android:textColor="@color/white"
+            android:textColorHint="#72FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/emailEt" />
+
         <Button
-            android:id="@+id/registerBtn"
+            android:id="@+id/login2Btn"
             android:layout_width="270dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="70dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="71dp"
             android:backgroundTint="@color/white"
             android:outlineProvider="none"
@@ -82,67 +106,22 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/choiceTxv" />
+            app:layout_constraintTop_toBottomOf="@+id/passwordEt" />
 
         <Button
-            android:id="@+id/loginBtn"
-            android:layout_width="270dp"
+            android:id="@+id/gobackBtn"
+            android:layout_width="265dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="70dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="71dp"
-            android:backgroundTint="@color/white"
+            android:background="@drawable/back_white_border"
             android:outlineProvider="none"
-            android:text="LOGIN"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/registerBtn" />
-
-        <TextView
-            android:id="@+id/choice2Txv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="155dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="156dp"
-            android:text="Or continue with"
+            android:text="GO BACK"
             android:textColor="@color/white"
-            android:textStyle="italic"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.6"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/loginBtn" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="158dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="158dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/choice2Txv">
-
-            <ImageButton
-                android:id="@+id/facebookBtn"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginRight="10sp"
-                android:background="#00FFFFFF"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/facebook_app_round_white_icon" />
-
-            <ImageButton
-                android:id="@+id/instagramBtn"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:background="#00FFFFFF"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/instagram_circle" />
-        </LinearLayout>
-
+            app:layout_constraintTop_toBottomOf="@+id/login2Btn" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </RelativeLayout>
