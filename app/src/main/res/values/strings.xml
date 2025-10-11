@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Gainly</string>
     <string name="title_activity_base">BaseActivity</string>
+    <string name="title_history">My History</string>
+    <string name="description_history">track your fitness journey</string>
+    <string name="textView">TextView</string>
 </resources>
