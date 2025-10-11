@@ -17,8 +17,14 @@ import com.itismob.s17.gainly.ui.theme.GainlyTheme
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+<<<<<<< Updated upstream
         setContentView(R.layout.main_page)
 
 }
+=======
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+    }
+>>>>>>> Stashed changes
 }
 
