@@ -10,7 +10,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Gainly">
+        android:theme="@style/Theme.Gainly"
+        tools:targetApi="31">
+
+        <!-- Main entry activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -18,10 +21,11 @@
             android:theme="@style/Theme.Gainly">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Other activities extend BaseActivity, no need to declare BaseActivity itself -->
     </application>
 
 </manifest>
