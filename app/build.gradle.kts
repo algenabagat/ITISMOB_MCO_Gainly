@@ -51,7 +51,11 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.recyclerview)
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     implementation(libs.androidx.appcompat)
+=======
+    implementation(libs.androidx.constraintlayout)
+>>>>>>> Stashed changes
 =======
     implementation(libs.androidx.constraintlayout)
 >>>>>>> Stashed changes
