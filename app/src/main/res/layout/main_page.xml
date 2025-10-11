@@ -18,8 +18,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:clickable="false"
+            android:password="false"
+            android:singleLine="false"
+            android:soundEffectsEnabled="false"
             android:text="My Workouts"
             android:textColor="#000000"
+            android:textIsSelectable="false"
             android:textSize="25sp"
             android:textStyle="bold" />
 
