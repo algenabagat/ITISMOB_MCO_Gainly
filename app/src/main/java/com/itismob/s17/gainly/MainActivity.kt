@@ -18,9 +18,15 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         setContentView(R.layout.main_page)
 
 }
+=======
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+    }
+>>>>>>> Stashed changes
 =======
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)

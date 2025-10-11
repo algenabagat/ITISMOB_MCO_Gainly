@@ -84,10 +84,13 @@
 
         <LinearLayout
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             android:id="@+id/newWorkoutLl"
             android:layout_width="match_parent"
             android:layout_height="210dp"
 =======
+=======
+>>>>>>> Stashed changes
             android:layout_width="360dp"
             android:layout_height="200dp"
 >>>>>>> Stashed changes
