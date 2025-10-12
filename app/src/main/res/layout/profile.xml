@@ -85,43 +85,54 @@
             android:layout_width="320dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
+            android:background="@android:drawable/edit_text"
             android:ems="10"
             android:hint="Change Email Address"
             android:inputType="textEmailAddress"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray" />
 
         <EditText
             android:id="@+id/changeNameTx"
             android:layout_width="320dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:background="@android:drawable/edit_text"
             android:ems="10"
             android:hint="Change Name"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray" />
 
         <EditText
             android:id="@+id/changePass1Tx"
             android:layout_width="320dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:background="@android:drawable/edit_text"
             android:ems="10"
             android:hint="Change Password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray" />
 
         <EditText
             android:id="@+id/changePass2Tx"
             android:layout_width="320dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:background="@android:drawable/edit_text"
             android:ems="10"
             android:hint="Confirm Password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray" />
 
         <Button
             android:id="@+id/saveBtn"
             android:layout_width="320dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/rounded_corner_container"
             android:backgroundTint="#000000"
             android:text="SAVE CHANGES"
