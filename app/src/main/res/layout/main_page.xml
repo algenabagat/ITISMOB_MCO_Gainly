@@ -77,7 +77,8 @@
                 android:background="@drawable/rounded_corner_container"
                 android:backgroundTint="#FFFFFF"
                 android:text="+   New Workout"
-                android:textAllCaps="false" />
+                android:textAllCaps="false"
+                android:textColor="@color/black" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView

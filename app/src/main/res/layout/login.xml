@@ -103,6 +103,7 @@
             android:backgroundTint="@color/white"
             android:outlineProvider="none"
             android:text="LOGIN"
+            android:textColor="@color/black"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
