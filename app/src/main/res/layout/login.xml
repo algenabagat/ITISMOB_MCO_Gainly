@@ -102,7 +102,7 @@
             android:layout_marginEnd="71dp"
             android:backgroundTint="@color/white"
             android:outlineProvider="none"
-            android:text="REGISTER"
+            android:text="LOGIN"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
