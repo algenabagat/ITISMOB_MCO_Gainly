@@ -1,12 +1,9 @@
 package com.itismob.s17.gainly
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ScrollView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -16,22 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.itismob.s17.gainly.ui.theme.GainlyTheme
 
-class MainActivity : BaseActivity() {
+class HistoryActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_page)
-        setupClickListeners()
-        scrollToTop()
-    }
-
-    private fun setupClickListeners() {
-    }
-
-    private fun scrollToTop() {
-        val scrollView = findViewById<ScrollView>(R.id.workoutSv)
-        scrollView?.post {
-            scrollView.scrollTo(0, 0)
-        }
+        setContentView(R.layout.history_layout)
     }
 }
-

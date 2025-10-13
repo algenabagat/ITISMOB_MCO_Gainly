@@ -4,4 +4,5 @@
     <string name="title_history">My History</string>
     <string name="description_history">track your fitness journey</string>
     <string name="textView">TextView</string>
+    <string name="title_activity_history">HistoryActivity</string>
 </resources>
