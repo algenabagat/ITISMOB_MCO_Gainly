@@ -18,15 +18,12 @@ class LoginActivity : AppCompatActivity() {
         val goBackBtn = findViewById<Button>(R.id.gobackBtn)
 
         loginBtn.setOnClickListener {
-            // Navigate to main page after login
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            finish()
+            // automatic navigate to mainactivity page
+            startActivity(Intent(this, MainActivity::class.java))
         }
 
         goBackBtn.setOnClickListener {
-            // Go back to welcome screen
+            // goes back to either register or welcome page
             finish()
         }
     }

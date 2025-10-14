@@ -8,16 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 open class BaseActivity : AppCompatActivity() {
 
     override fun setContentView(layoutResID: Int) {
-        // Only use header/footer for main page and plan layout
         if (layoutResID == R.layout.main_page || layoutResID == R.layout.plan_layout || layoutResID == R.layout.history_layout) {
             val fullView = layoutInflater.inflate(R.layout.layout_header_footer, null)
             val frame = fullView.findViewById<FrameLayout>(R.id.content_frame)
             layoutInflater.inflate(layoutResID, frame, true)
             super.setContentView(fullView)
             setupHeader()
-            setupBottomNav()
+            // setupBottomNav()
         } else {
-            // For other activities, use the layout directly without header/footer
             super.setContentView(layoutResID)
         }
     }
@@ -28,38 +26,26 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupBottomNav() {
-        findViewById<View>(R.id.planBtn)?.setOnClickListener {
-            if (this !is PlanActivity) {
-                startActivity(Intent(this, PlanActivity::class.java))
-                finish() // Close current activity
-            }
-        }
-
-        findViewById<View>(R.id.workoutBtn)?.setOnClickListener {
-            if (this !is MainActivity) {
-                startActivity(Intent(this, MainActivity::class.java))
-                finish() // Close current activity
-            }
-        }
-
-        findViewById<View>(R.id.historyBtn)?.setOnClickListener {
-            if (this !is HistoryActivity) {
-                startActivity(Intent(this, HistoryActivity::class.java))
-                finish() // Close current activity
-            }
-        }
-    }
-}
-
 //    private fun setupBottomNav() {
-//        findViewById<View>(R.id.imageButton5)?.setOnClickListener {
-//            startActivity(Intent(this, HistoryActivity::class.java))
+//        findViewById<View>(R.id.planBtn)?.setOnClickListener {
+//            if (this !is PlanActivity) {
+//                startActivity(Intent(this, PlanActivity::class.java))
+//                finish() // Close current activity
+//            }
 //        }
-//        findViewById<View>(R.id.imageButton6)?.setOnClickListener {
-//            startActivity(Intent(this, WorkoutActivity::class.java))
+//
+//        findViewById<View>(R.id.workoutBtn)?.setOnClickListener {
+//            if (this !is MainActivity) {
+//                startActivity(Intent(this, MainActivity::class.java))
+//                finish() // Close current activity
+//            }
 //        }
-//        findViewById<View>(R.id.imageButton)?.setOnClickListener {
-//            startActivity(Intent(this, ExerciseActivity::class.java))
+//
+//        findViewById<View>(R.id.historyBtn)?.setOnClickListener {
+//            if (this !is HistoryActivity) {
+//                startActivity(Intent(this, HistoryActivity::class.java))
+//                finish() // Close current activity
+//            }
 //        }
 //    }
+}

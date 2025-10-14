@@ -18,12 +18,12 @@ class RegisterActivity : AppCompatActivity() {
         val goBackBtn = findViewById<Button>(R.id.gobackBtn)
 
         registerBtn.setOnClickListener {
-            // Navigate to login page after registration
+            // goes to login after register
             startActivity(Intent(this, LoginActivity::class.java))
         }
 
         goBackBtn.setOnClickListener {
-            // Go back to welcome screen
+            // back to welcome screen
             finish()
         }
     }
