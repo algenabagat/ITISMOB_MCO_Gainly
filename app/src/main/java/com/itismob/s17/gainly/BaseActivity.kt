@@ -14,7 +14,7 @@ open class BaseActivity : AppCompatActivity() {
             layoutInflater.inflate(layoutResID, frame, true)
             super.setContentView(fullView)
             setupHeader()
-            // setupBottomNav()
+            setupBottomNav()
         } else {
             super.setContentView(layoutResID)
         }
@@ -26,26 +26,26 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
-//    private fun setupBottomNav() {
-//        findViewById<View>(R.id.planBtn)?.setOnClickListener {
-//            if (this !is PlanActivity) {
-//                startActivity(Intent(this, PlanActivity::class.java))
-//                finish() // Close current activity
-//            }
-//        }
-//
-//        findViewById<View>(R.id.workoutBtn)?.setOnClickListener {
-//            if (this !is MainActivity) {
-//                startActivity(Intent(this, MainActivity::class.java))
-//                finish() // Close current activity
-//            }
-//        }
-//
-//        findViewById<View>(R.id.historyBtn)?.setOnClickListener {
-//            if (this !is HistoryActivity) {
-//                startActivity(Intent(this, HistoryActivity::class.java))
-//                finish() // Close current activity
-//            }
-//        }
-//    }
+    private fun setupBottomNav() {
+        findViewById<View>(R.id.planBtn)?.setOnClickListener {
+            if (this !is PlanActivity) {
+                startActivity(Intent(this, PlanActivity::class.java))
+                finish() // Close current activity
+            }
+        }
+
+        findViewById<View>(R.id.workoutBtn)?.setOnClickListener {
+            if (this !is MainActivity) {
+                startActivity(Intent(this, MainActivity::class.java))
+                finish() // Close current activity
+            }
+        }
+
+        findViewById<View>(R.id.historyBtn)?.setOnClickListener {
+            if (this !is HistoryActivity) {
+                startActivity(Intent(this, HistoryActivity::class.java))
+                finish() // Close current activity
+            }
+        }
+    }
 }
