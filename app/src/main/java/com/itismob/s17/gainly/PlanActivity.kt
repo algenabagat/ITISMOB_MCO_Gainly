@@ -22,14 +22,14 @@ class PlanActivity : BaseActivity() {
             showCreatePlanDialog()
         }
 
-        pickTimeBtn.setOnClickListener {
-            TimePickerFragment().show(supportFragmentManager, "timePicker")
-        }
-
-        pickDateBtn.setOnClickListener {
-            val newFragment = DatePickerFragment()
-            newFragment.show(supportFragmentManager, "datePicker")
-        }
+//        pickTimeBtn.setOnClickListener {
+//            TimePickerFragment().show(supportFragmentManager, "timePicker")
+//        }
+//
+//        pickDateBtn.setOnClickListener {
+//            val newFragment = DatePickerFragment()
+//            newFragment.show(supportFragmentManager, "datePicker")
+//        }
     }
 
     private fun showCreatePlanDialog() {
