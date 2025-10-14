@@ -15,21 +15,10 @@ class PlanActivity : BaseActivity() {
 
     private fun setupClickListeners() {
         val newPlanBtn = findViewById<Button>(R.id.newPlanBtn)
-        val pickTimeBtn = findViewById<Button>(R.id.pickTime)
-        val pickDateBtn = findViewById<Button>(R.id.pickDate)
 
         newPlanBtn.setOnClickListener {
             showCreatePlanDialog()
         }
-
-//        pickTimeBtn.setOnClickListener {
-//            TimePickerFragment().show(supportFragmentManager, "timePicker")
-//        }
-//
-//        pickDateBtn.setOnClickListener {
-//            val newFragment = DatePickerFragment()
-//            newFragment.show(supportFragmentManager, "datePicker")
-//        }
     }
 
     private fun showCreatePlanDialog() {
@@ -39,6 +28,18 @@ class PlanActivity : BaseActivity() {
 
         val closeBtn = dialog.findViewById<ImageButton>(R.id.closePlanBtn)
         val createPlanBtn = dialog.findViewById<Button>(R.id.createPlanBtn)
+
+        val pickTime = dialog.findViewById<Button>(R.id.pickTime)
+        val pickDate = dialog.findViewById<Button>(R.id.pickDate)
+
+        pickTime.setOnClickListener {
+            TimePickerFragment().show(supportFragmentManager, "timePicker")
+        }
+
+        pickDate.setOnClickListener {
+            val newFragment = DatePickerFragment()
+            newFragment.show(supportFragmentManager, "datePicker")
+        }
 
 
         closeBtn.setOnClickListener {
