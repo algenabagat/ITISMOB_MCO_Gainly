@@ -32,7 +32,7 @@
             android:textSize="14sp" />
 
         <Button
-            android:id="@+id/createPlanBtn"
+            android:id="@+id/newPlanBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_corner_container"
