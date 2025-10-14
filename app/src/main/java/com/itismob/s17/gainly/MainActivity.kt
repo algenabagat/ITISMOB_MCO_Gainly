@@ -1,7 +1,9 @@
 package com.itismob.s17.gainly
 
+import android.app.Dialog
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ScrollView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,7 +27,26 @@ class MainActivity : BaseActivity() {
     }
 
     private fun setupClickListeners() {
+        val newWorkoutBtn = findViewById<Button>(R.id.newWorkoutBtn)
+        newWorkoutBtn.setOnClickListener {
+            showNewWorkoutDialog()
+        }
     }
+
+    private fun showNewWorkoutDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.new_workout_popup)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val closeBtn = dialog.findViewById<ImageButton>(R.id.closeBtn)
+
+        closeBtn.setOnClickListener {
+            dialog.dismiss() // closes the dialog
+        }
+
+        dialog.show()
+    }
+
 
     private fun scrollToTop() {
         val scrollView = findViewById<ScrollView>(R.id.workoutSv)
