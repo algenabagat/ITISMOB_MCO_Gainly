@@ -6,7 +6,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class WorkoutAdapter(private var workouts: List<Workout> = emptyList()) : RecyclerView.Adapter<WorkoutViewHolder>() {
+class WorkoutAdapter(
+    private var workouts: List<Workout> = emptyList(),
+    private val onExerciseClick: (Exercise) -> Unit = {},
+    private val onStartWorkout: (Workout) -> Unit = {}
+) : RecyclerView.Adapter<WorkoutViewHolder>() {
 
     fun updateWorkouts(newWorkouts: List<Workout>) {
         workouts = newWorkouts
@@ -34,9 +38,12 @@ class WorkoutAdapter(private var workouts: List<Workout> = emptyList()) : Recycl
         val exercisesToShow = workout.exercises.take(3)
         exercisesToShow.forEach { exercise ->
             val exerciseView = TextView(holder.itemView.context).apply {
-                text = "• $exercise"
+                text = "• ${exercise.name} (${exercise.sets}x${exercise.reps})"
                 setTextColor(holder.itemView.context.getColor(android.R.color.black))
                 textSize = 12f
+                setOnClickListener {
+                    onExerciseClick(exercise)
+                }
             }
             holder.exercisesLayout.addView(exerciseView)
         }
@@ -49,6 +56,16 @@ class WorkoutAdapter(private var workouts: List<Workout> = emptyList()) : Recycl
                 textSize = 12f
             }
             holder.exercisesLayout.addView(moreView)
+        }
+
+        // Set click listener for start button
+        holder.startBtn.setOnClickListener {
+            onStartWorkout(workout)
+        }
+
+        // TODO: Implement options button functionality
+        holder.optionsBtn.setOnClickListener {
+            // Show menu for editing workout, deleting, etc.
         }
     }
 
