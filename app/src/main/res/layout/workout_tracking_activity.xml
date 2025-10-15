@@ -67,7 +67,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:background="@drawable/back_gray_border"
-            android:text="CANCEL WORKOUT" />
+            android:text="CANCEL WORKOUT"
+            android:textColor="@color/black" />
 
     </LinearLayout>
 
