@@ -13,6 +13,7 @@ class WorkoutTrackingActivity : AppCompatActivity() {
     private lateinit var workoutNameTv: TextView
     private lateinit var exercisesContainer: LinearLayout
     private lateinit var nextBtn: Button
+    private lateinit var cancelWorkoutBtn : Button
 
     private var timer: CountDownTimer? = null
     private var secondsElapsed = 0L
@@ -32,12 +33,18 @@ class WorkoutTrackingActivity : AppCompatActivity() {
         workoutNameTv = findViewById(R.id.workoutNameTv)
         exercisesContainer = findViewById(R.id.exercisesContainer)
         nextBtn = findViewById(R.id.nextBtn)
+        cancelWorkoutBtn = findViewById(R.id.cancelWorkoutBtn)
 
         // Set button background color programmatically
         nextBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.gray))
 
         nextBtn.setOnClickListener {
             Toast.makeText(this, "Workout completed! Progress saved.", Toast.LENGTH_SHORT).show()
+            finish()
+        }
+
+        cancelWorkoutBtn.setOnClickListener {
+            Toast.makeText(this, "Workout cancelled!", Toast.LENGTH_SHORT).show()
             finish()
         }
     }
