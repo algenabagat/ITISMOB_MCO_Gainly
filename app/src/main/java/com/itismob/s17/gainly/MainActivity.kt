@@ -75,21 +75,30 @@ class MainActivity : BaseActivity() {
         dialog.setContentView(R.layout.exercise_detail_dialog)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        val exerciseNameTv = dialog.findViewById<TextView>(R.id.exerciseNameTv)
+        // Get references to the dialog views - use the correct IDs from your XML
+        val exerciseNameTv = dialog.findViewById<TextView>(R.id.workoutTv) // This was the issue!
         // val exerciseImageIv = dialog.findViewById<ImageView>(R.id.exerciseImageIv)
         val exerciseDescriptionTv = dialog.findViewById<TextView>(R.id.exerciseDescriptionTv)
         val targetMuscleTv = dialog.findViewById<TextView>(R.id.targetMuscleTv)
         val closeBtn = dialog.findViewById<ImageButton>(R.id.closeBtn)
 
-        // populating data
-        exerciseNameTv.text = exercise.name
-        exerciseDescriptionTv.text = exercise.description
-        targetMuscleTv.text = exercise.targetMuscle
+        // Check if views are not null before using them
+        if (exerciseNameTv != null) {
+            exerciseNameTv.text = exercise.name
+        }
+
+        if (exerciseDescriptionTv != null) {
+            exerciseDescriptionTv.text = exercise.description
+        }
+
+        if (targetMuscleTv != null) {
+            targetMuscleTv.text = exercise.targetMuscle
+        }
 
         // Set the exercise image (using the resource ID from the Exercise object)
         // exerciseImageIv.setImageResource(exercise.imageResId)
 
-        closeBtn.setOnClickListener {
+        closeBtn?.setOnClickListener {
             dialog.dismiss()
         }
 
@@ -97,8 +106,9 @@ class MainActivity : BaseActivity() {
     }
 
     private fun startWorkout(workout: Workout) {
-        // TODO: Implement workout session activity/fragment
-        // This should allow users to track their progress through each exercise
+        val intent = Intent(this, WorkoutTrackingActivity::class.java)
+        intent.putExtra("workout", workout)
+        startActivity(intent)
     }
 
     private fun toggleFavorite(workout: Workout, isFavorite: Boolean) {
