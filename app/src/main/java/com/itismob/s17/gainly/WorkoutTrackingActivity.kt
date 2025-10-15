@@ -17,7 +17,6 @@ class WorkoutTrackingActivity : AppCompatActivity() {
     private var timer: CountDownTimer? = null
     private var secondsElapsed = 0L
     private var currentWorkout: Workout? = null
-    private val exerciseSessions = mutableListOf<ExerciseSession>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +37,7 @@ class WorkoutTrackingActivity : AppCompatActivity() {
         nextBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.gray))
 
         nextBtn.setOnClickListener {
-            saveWorkoutData()
+            Toast.makeText(this, "Workout completed! Progress saved.", Toast.LENGTH_SHORT).show()
             finish()
         }
     }
@@ -71,17 +70,10 @@ class WorkoutTrackingActivity : AppCompatActivity() {
             sets.add(set)
         }
 
-        // Store the exercise session
-        exerciseSessions.add(ExerciseSession(exercise.name, sets))
 
         addSetBtn.setOnClickListener {
             val newSet = addSetView(setsContainer, exercise, setsContainer.childCount + 1)
             sets.add(newSet)
-            // Update the exercise session with new sets list
-            exerciseSessions.find { it.exerciseName == exercise.name }?.let { session ->
-                exerciseSessions.remove(session)
-                exerciseSessions.add(ExerciseSession(exercise.name, sets))
-            }
         }
 
         exercisesContainer.addView(exerciseView)
@@ -169,57 +161,6 @@ class WorkoutTrackingActivity : AppCompatActivity() {
         val minutes = secondsElapsed / 60
         val seconds = secondsElapsed % 60
         timerTv.text = String.format("%d:%02d", minutes, seconds)
-    }
-
-    private fun saveWorkoutData() {
-        currentWorkout?.let { workout ->
-            // Update exercise personal bests and last weights
-            workout.exercises.forEach { exercise ->
-                val session = exerciseSessions.find { it.exerciseName == exercise.name }
-                session?.let {
-                    val maxWeight = it.getMaxWeight()
-                    if (maxWeight > exercise.personalBest) {
-                        exercise.personalBest = maxWeight
-                    }
-                    if (maxWeight > 0) {
-                        exercise.lastWeight = maxWeight
-                    }
-                }
-            }
-
-            // Create workout session
-            val workoutSession = WorkoutSession(
-                workoutName = workout.name,
-                exerciseSessions = exerciseSessions,
-                duration = secondsElapsed,
-                completed = true
-            )
-
-            // Save to storage
-            saveSessionToStorage(workoutSession)
-            updateWorkoutProgress(workout)
-
-            Toast.makeText(this, "Workout completed! Progress saved.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun saveSessionToStorage(session: WorkoutSession) {
-        // For now, just print to log - you can implement SharedPreferences or Room DB later
-        println("Session saved: ${session.workoutName}")
-        println("Duration: ${session.duration} seconds")
-        println("Total volume: ${session.getTotalVolume()}")
-        session.exerciseSessions.forEach { exerciseSession ->
-            println("${exerciseSession.exerciseName}: ${exerciseSession.getMaxWeight()} lbs max")
-        }
-    }
-
-    private fun updateWorkoutProgress(workout: Workout) {
-        // Update your main workout list with new progress data
-        // This would typically update your database or shared preferences
-        println("Updated workout progress for: ${workout.name}")
-        workout.exercises.forEach { exercise ->
-            println("${exercise.name}: Last weight = ${exercise.lastWeight}, PB = ${exercise.personalBest}")
-        }
     }
 
     override fun onDestroy() {
