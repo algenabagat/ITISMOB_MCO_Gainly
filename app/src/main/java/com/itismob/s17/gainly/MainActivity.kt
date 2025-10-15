@@ -1,6 +1,7 @@
 package com.itismob.s17.gainly
 
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
@@ -71,7 +72,7 @@ class MainActivity : BaseActivity() {
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         // Get references to the dialog views
-        val exerciseNameTv = dialog.findViewById<TextView>(R.id.exerciseNameTv)
+        val exerciseNameTv = dialog.findViewById<TextView>(R.id.workoutTv)
         //val exerciseImageIv = dialog.findViewById<ImageView>(R.id.exerciseImageIv)
         val exerciseDescriptionTv = dialog.findViewById<TextView>(R.id.exerciseDescriptionTv)
         val targetMuscleTv = dialog.findViewById<TextView>(R.id.targetMuscleTv)
@@ -93,8 +94,9 @@ class MainActivity : BaseActivity() {
     }
 
     private fun startWorkout(workout: Workout) {
-        // TODO: Implement workout session activity/fragment
-        // This should allow users to track their progress through each exercise
+        val intent = Intent(this, WorkoutTrackingActivity::class.java)
+        intent.putExtra("workout", workout)
+        startActivity(intent)
     }
 
     private fun addSampleWorkouts() {
@@ -109,28 +111,36 @@ class MainActivity : BaseActivity() {
                         description = "Stand with feet shoulder-width apart, lower your body as if sitting in a chair, then return to standing position.",
                         targetMuscle = "Quadriceps, Glutes, Hamstrings",
                         sets = 4,
-                        reps = 12
+                        reps = 12,
+                        lastWeight = 60.0,
+                        personalBest = 70.0
                     ),
                     Exercise(
                         name = "Romanian Deadlift",
                         description = "Hold a barbell or dumbbells, hinge at your hips while keeping your back straight, lower the weight, then return to standing.",
                         targetMuscle = "Hamstrings, Glutes",
                         sets = 3,
-                        reps = 10
+                        reps = 10,
+                        lastWeight = 100.0,
+                        personalBest = 120.0
                     ),
                     Exercise(
                         name = "Lunges",
                         description = "Step forward with one leg, lower your hips until both knees are bent at 90-degree angles, then return to starting position.",
                         targetMuscle = "Quadriceps, Glutes",
                         sets = 3,
-                        reps = 10
+                        reps = 10,
+                        lastWeight = 100.0,
+                        personalBest = 120.0
                     ),
                     Exercise(
                         name = "Calf Raises",
                         description = "Stand with feet hip-width apart, raise your heels off the ground, then lower them back down.",
                         targetMuscle = "Calves",
                         sets = 4,
-                        reps = 15
+                        reps = 15,
+                        lastWeight = 100.0,
+                        personalBest = 120.0
                     )
                 )
             )
@@ -146,21 +156,27 @@ class MainActivity : BaseActivity() {
                         description = "Lie on a flat bench, lower the barbell to your chest, then press it back up to starting position.",
                         targetMuscle = "Chest, Triceps, Shoulders",
                         sets = 4,
-                        reps = 8
+                        reps = 8,
+                        lastWeight = 165.0,
+                        personalBest = 215.0
                     ),
                     Exercise(
                         name = "Pull-ups",
                         description = "Hang from a bar with palms facing away, pull your body up until your chin is above the bar, then lower yourself down.",
                         targetMuscle = "Back, Biceps",
                         sets = 3,
-                        reps = 6
+                        reps = 6,
+                        lastWeight = 40.0,
+                        personalBest = 50.0
                     ),
                     Exercise(
                         name = "Shoulder Press",
                         description = "Sit or stand with dumbbells at shoulder height, press them overhead until arms are fully extended, then lower back down.",
                         targetMuscle = "Shoulders, Triceps",
                         sets = 3,
-                        reps = 10
+                        reps = 10,
+                        lastWeight = 50.0,
+                        personalBest = 60.0
                     )
                 )
             )
@@ -175,4 +191,6 @@ class MainActivity : BaseActivity() {
             scrollView.scrollTo(0, 0)
         }
     }
+
+
 }

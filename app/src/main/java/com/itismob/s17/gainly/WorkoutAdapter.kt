@@ -34,9 +34,8 @@ class WorkoutAdapter(
         // clear views
         holder.exercisesLayout.removeAllViews()
 
-        // add exercises (max 3)
-        val exercisesToShow = workout.exercises.take(3)
-        exercisesToShow.forEach { exercise ->
+        // add ALL exercises (no limit)
+        workout.exercises.forEach { exercise ->
             val exerciseView = TextView(holder.itemView.context).apply {
                 text = "• ${exercise.name} (${exercise.sets}x${exercise.reps})"
                 setTextColor(holder.itemView.context.getColor(android.R.color.black))
@@ -46,16 +45,6 @@ class WorkoutAdapter(
                 }
             }
             holder.exercisesLayout.addView(exerciseView)
-        }
-
-        // more than 3 exercises will show "..."
-        if (workout.exercises.size > 3) {
-            val moreView = TextView(holder.itemView.context).apply {
-                text = "..."
-                setTextColor(holder.itemView.context.getColor(android.R.color.black))
-                textSize = 12f
-            }
-            holder.exercisesLayout.addView(moreView)
         }
 
         // Set click listener for start button
