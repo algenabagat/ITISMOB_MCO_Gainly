@@ -31,6 +31,7 @@
         <activity android:name=".PlanActivity" />
         <activity android:name=".HistoryActivity"/>
         <activity android:name=".WorkoutTrackingActivity" />
+        <activity android:name=".FinishWorkoutSummaryActivity"/>
     </application>
 
 </manifest>

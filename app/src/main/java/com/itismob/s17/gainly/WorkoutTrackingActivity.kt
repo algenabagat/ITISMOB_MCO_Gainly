@@ -1,5 +1,6 @@
 package com.itismob.s17.gainly
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
@@ -40,7 +41,7 @@ class WorkoutTrackingActivity : AppCompatActivity() {
 
         nextBtn.setOnClickListener {
             Toast.makeText(this, "Workout completed! Progress saved.", Toast.LENGTH_SHORT).show()
-            finish()
+            startActivity(Intent(this, FinishWorkoutSummaryActivity::class.java))
         }
 
         cancelWorkoutBtn.setOnClickListener {
