@@ -39,7 +39,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@android:drawable/ic_menu_close_clear_cancel" />
+                    android:src="@drawable/outline_cancel_24" />
 
             </LinearLayout>
 

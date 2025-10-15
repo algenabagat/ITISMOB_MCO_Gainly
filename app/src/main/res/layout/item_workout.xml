@@ -16,15 +16,29 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/workoutNameTv"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:text="Leg Day"
-            android:textColor="#000000"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/workoutNameTv"
+                android:layout_width="290dp"
+                android:layout_height="50dp"
+                android:layout_marginBottom="4dp"
+                android:gravity="center_vertical"
+                android:text="Leg Day"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/favoriteBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:backgroundTint="#00FFFFFF"
+                app:srcCompat="@drawable/not_favorite" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/workoutDescriptionTv"
