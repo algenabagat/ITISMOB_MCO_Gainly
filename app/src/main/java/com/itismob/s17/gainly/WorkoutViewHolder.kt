@@ -12,8 +12,7 @@ class WorkoutViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val workoutDescriptionTv: TextView = itemView.findViewById(R.id.workoutDescriptionTv)
     val exerciseCountTv: TextView = itemView.findViewById(R.id.exerciseCountTv)
     val exercisesLayout: LinearLayout = itemView.findViewById(R.id.exercisesLayout)
-
-    // these have no use yet
     val startBtn: Button = itemView.findViewById(R.id.startBtn)
     val optionsBtn: ImageButton = itemView.findViewById(R.id.optionsBtn)
+    val favoriteBtn: ImageButton = itemView.findViewById(R.id.favoriteBtn)
 }

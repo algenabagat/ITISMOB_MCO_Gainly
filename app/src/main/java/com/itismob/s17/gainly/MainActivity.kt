@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -32,6 +33,9 @@ class MainActivity : BaseActivity() {
             },
             onStartWorkout = { workout ->
                 startWorkout(workout)
+            },
+            onFavoriteToggle = { workout, isFavorite ->
+                toggleFavorite(workout, isFavorite)
             }
         )
 
@@ -70,20 +74,19 @@ class MainActivity : BaseActivity() {
         dialog.setContentView(R.layout.exercise_detail_dialog)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        // Get references to the dialog views
         val exerciseNameTv = dialog.findViewById<TextView>(R.id.exerciseNameTv)
-        //val exerciseImageIv = dialog.findViewById<ImageView>(R.id.exerciseImageIv)
+        // val exerciseImageIv = dialog.findViewById<ImageView>(R.id.exerciseImageIv)
         val exerciseDescriptionTv = dialog.findViewById<TextView>(R.id.exerciseDescriptionTv)
         val targetMuscleTv = dialog.findViewById<TextView>(R.id.targetMuscleTv)
         val closeBtn = dialog.findViewById<ImageButton>(R.id.closeBtn)
 
-        // Populate the dialog with exercise data
+        // populating data
         exerciseNameTv.text = exercise.name
         exerciseDescriptionTv.text = exercise.description
         targetMuscleTv.text = exercise.targetMuscle
 
         // Set the exercise image (using the resource ID from the Exercise object)
-        //exerciseImageIv.setImageResource(exercise.imageResId)
+        // exerciseImageIv.setImageResource(exercise.imageResId)
 
         closeBtn.setOnClickListener {
             dialog.dismiss()
@@ -95,6 +98,18 @@ class MainActivity : BaseActivity() {
     private fun startWorkout(workout: Workout) {
         // TODO: Implement workout session activity/fragment
         // This should allow users to track their progress through each exercise
+    }
+
+    private fun toggleFavorite(workout: Workout, isFavorite: Boolean) {
+        val index = workoutList.indexOfFirst { it.name == workout.name }
+        if (index != -1) {
+            val updatedWorkout = workout.copy(isFavorite = isFavorite)
+            workoutList[index] = updatedWorkout
+            workoutAdapter.updateWorkouts(workoutList)
+
+            val message = if (isFavorite) "Added to favorites" else "Removed from favorites"
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun addSampleWorkouts() {
