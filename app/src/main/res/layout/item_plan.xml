@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="370dp"
+    android:layout_width="343dp"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:layout_marginBottom="25dp"
@@ -29,7 +29,7 @@
                 android:gravity="center_vertical"
                 android:text="Leg Day"
                 android:textColor="#000000"
-                android:textSize="26sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -50,7 +50,7 @@
                 android:layout_marginBottom="2dp"
                 android:text="10/20/25"
                 android:textColor="#000000"
-                android:textSize="20sp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/timeTv"
@@ -59,7 +59,7 @@
                 android:layout_marginBottom="2dp"
                 android:text="21:00"
                 android:textColor="#000000"
-                android:textSize="20sp" />
+                android:textSize="16sp" />
 
         </LinearLayout>
 
