@@ -15,7 +15,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Exercise Name -->
         <TextView
             android:id="@+id/exerciseNameTv"
             android:layout_width="match_parent"
@@ -26,7 +25,6 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <!-- Header Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -78,14 +76,12 @@
 
         </LinearLayout>
 
-        <!-- Sets Container -->
         <LinearLayout
             android:id="@+id/setsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
-        <!-- Add Set Button -->
         <Button
             android:id="@+id/addSetBtn"
             android:layout_width="wrap_content"
@@ -96,8 +92,6 @@
             android:text="+ Add Set"
             android:textColor="@color/black"
             android:textSize="14sp" />
-
-        <!-- Divider -->
 
     </LinearLayout>
 

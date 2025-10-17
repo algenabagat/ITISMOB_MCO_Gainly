@@ -9,11 +9,12 @@ data class ExerciseSession(
         return sets.sumOf { it.weight * it.reps }
     }
 
-    fun getMaxWeight(): Double {
-        return sets.maxOfOrNull { it.weight } ?: 0.0
-    }
-
-    fun getAllSetsCompleted(): Boolean {
-        return sets.all { it.completed }
-    }
+//    currently not in use
+//    fun getMaxWeight(): Double {
+//        return sets.maxOfOrNull { it.weight } ?: 0.0
+//    }
+//
+//    fun getAllSetsCompleted(): Boolean {
+//        return sets.all { it.completed }
+//    }
 }

@@ -12,7 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Gainly"
         tools:targetApi="31" >
-        <!-- Main entry activity -->
         <activity
             android:name=".WelcomeActivity"
             android:exported="true"

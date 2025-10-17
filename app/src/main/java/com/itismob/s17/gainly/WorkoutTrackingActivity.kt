@@ -36,7 +36,6 @@ class WorkoutTrackingActivity : AppCompatActivity() {
         nextBtn = findViewById(R.id.nextBtn)
         cancelWorkoutBtn = findViewById(R.id.cancelWorkoutBtn)
 
-        // Set button background color programmatically
         nextBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.gray))
 
         nextBtn.setOnClickListener {
@@ -72,7 +71,6 @@ class WorkoutTrackingActivity : AppCompatActivity() {
 
         val sets = mutableListOf<ExerciseSet>()
 
-        // Add initial sets
         repeat(exercise.sets) { setIndex ->
             val set = addSetView(setsContainer, exercise, setIndex + 1)
             sets.add(set)
@@ -99,29 +97,23 @@ class WorkoutTrackingActivity : AppCompatActivity() {
 
         setNumberTv.text = "$setNumber."
 
-        // Show previous weight (use lastWeight from exercise)
         previousWeightTv.text = exercise.lastWeight.toInt().toString()
 
-        // Set default reps to target reps
         repsEditText.setText(exercise.reps.toString())
 
-        // Create ExerciseSet object with initial values
         val exerciseSet = ExerciseSet(
             setNumber = setNumber,
-            weight = exercise.lastWeight, // Start with last weight
-            reps = exercise.reps, // Start with target reps
+            weight = exercise.lastWeight,
+            reps = exercise.reps,
             previousWeight = exercise.lastWeight
         )
 
-        // Set initial values in UI
         weightEditText.setText(exercise.lastWeight.toInt().toString())
 
-        // Set up listeners to update the ExerciseSet object in real-time
         weightEditText.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 val weight = weightEditText.text.toString().toDoubleOrNull() ?: 0.0
                 exerciseSet.weight = weight
-                // Auto-check when weight is entered
                 if (weight > 0 && !completedCheckbox.isChecked) {
                     completedCheckbox.isChecked = true
                 }
@@ -132,7 +124,6 @@ class WorkoutTrackingActivity : AppCompatActivity() {
             if (!hasFocus) {
                 val reps = repsEditText.text.toString().toIntOrNull() ?: 0
                 exerciseSet.reps = reps
-                // Auto-check when reps are entered
                 if (reps > 0 && !completedCheckbox.isChecked) {
                     completedCheckbox.isChecked = true
                 }
@@ -141,7 +132,6 @@ class WorkoutTrackingActivity : AppCompatActivity() {
 
         completedCheckbox.setOnCheckedChangeListener { _, isChecked ->
             exerciseSet.completed = isChecked
-            // If unchecked, clear the inputs
             if (!isChecked) {
                 weightEditText.setText("")
                 repsEditText.setText(exercise.reps.toString())

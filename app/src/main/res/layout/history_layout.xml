@@ -13,7 +13,6 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Header Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,7 +38,6 @@
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
-        <!-- Streak Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="120dp"
@@ -85,25 +83,14 @@
                     android:textSize="12sp" />
             </LinearLayout>
 
-            <!--
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_flame"
-                android:visibility="gone" />
-            -->
-
         </LinearLayout>
 
-        <!-- Stats Row 1 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:layout_marginBottom="16dp"
             android:orientation="horizontal">
 
-            <!-- Total Workouts Card -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -143,7 +130,6 @@
 
             </LinearLayout>
 
-            <!-- Total Sets Card -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -185,14 +171,12 @@
 
         </LinearLayout>
 
-        <!-- Stats Row 2 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:layout_marginBottom="24dp"
             android:orientation="horizontal">
 
-            <!-- Total Time Card -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -232,11 +216,8 @@
 
             </LinearLayout>
 
-            <!-- Calories Burned Card -->
-
         </LinearLayout>
 
-        <!-- Recent Workouts Section -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -246,7 +227,6 @@
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
 
-        <!-- Empty State for Recent Workouts -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="200dp"

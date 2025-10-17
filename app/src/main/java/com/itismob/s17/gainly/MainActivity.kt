@@ -75,14 +75,12 @@ class MainActivity : BaseActivity() {
         dialog.setContentView(R.layout.exercise_detail_dialog)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        // Get references to the dialog views - use the correct IDs from your XML
-        val exerciseNameTv = dialog.findViewById<TextView>(R.id.workoutTv) // This was the issue!
-        // val exerciseImageIv = dialog.findViewById<ImageView>(R.id.exerciseImageIv)
+        val exerciseNameTv = dialog.findViewById<TextView>(R.id.workoutTv)
+        // val exerciseImageIv = dialog.findViewById<ImageView>(R.id.exerciseImageIv) // not being used yet
         val exerciseDescriptionTv = dialog.findViewById<TextView>(R.id.exerciseDescriptionTv)
         val targetMuscleTv = dialog.findViewById<TextView>(R.id.targetMuscleTv)
         val closeBtn = dialog.findViewById<ImageButton>(R.id.closeBtn)
 
-        // Check if views are not null before using them
         if (exerciseNameTv != null) {
             exerciseNameTv.text = exercise.name
         }
@@ -95,7 +93,7 @@ class MainActivity : BaseActivity() {
             targetMuscleTv.text = exercise.targetMuscle
         }
 
-        // Set the exercise image (using the resource ID from the Exercise object)
+        // Set the exercise image WIP
         // exerciseImageIv.setImageResource(exercise.imageResId)
 
         closeBtn?.setOnClickListener {

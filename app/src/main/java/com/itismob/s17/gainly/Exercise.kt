@@ -9,6 +9,6 @@ data class Exercise(
     val targetMuscle: String,
     var sets: Int = 3,
     var reps: Int = 10,
-    var lastWeight: Double = 0.0, // Track last used weight
-    var personalBest: Double = 0.0 // Track personal best weight
+    var lastWeight: Double = 0.0,
+    var personalBest: Double = 0.0
 ) : Serializable

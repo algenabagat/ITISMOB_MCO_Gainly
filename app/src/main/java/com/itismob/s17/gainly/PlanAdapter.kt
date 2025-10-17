@@ -33,7 +33,6 @@ class PlanAdapter(
     override fun onBindViewHolder(holder: PlanViewHolder, position: Int) {
         val plan = plans[position]
 
-        // workout info
         holder.planNameTv.text = plan.workout.name
         val formattedMonth = String.format(Locale.US, "%02d", plan.month + 1)
         val formattedDay = String.format(Locale.US, "%02d", plan.day)
@@ -43,7 +42,6 @@ class PlanAdapter(
         val formattedTime = plan.hour.toString() + ":" + formattedMinute
         holder.timeTv.text = formattedTime
 
-        // Set click listener for start button
         holder.startPlanBtn.setOnClickListener {
             onStartPlan(plan)
         }

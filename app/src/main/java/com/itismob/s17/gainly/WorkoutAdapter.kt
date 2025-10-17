@@ -63,7 +63,6 @@ class WorkoutAdapter(
             holder.exercisesLayout.addView(exerciseView)
         }
 
-        // Set click listener for start button
         holder.startBtn.setOnClickListener {
             onStartWorkout(workout)
         }
