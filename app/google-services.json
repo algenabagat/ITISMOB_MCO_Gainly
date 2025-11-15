@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "712524062720",
+    "project_id": "the-gainly",
+    "storage_bucket": "the-gainly.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:712524062720:android:6943bea38456dc1fd778e5",
+        "android_client_info": {
+          "package_name": "com.itismob.s17.gainly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtjfyJLz8NGATv4FdUc0kAfRFG4LbTwEI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

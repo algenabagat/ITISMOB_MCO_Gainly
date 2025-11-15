@@ -5,4 +5,7 @@
     <string name="description_history">track your fitness journey</string>
     <string name="textView">TextView</string>
     <string name="title_activity_history">HistoryActivity</string>
+    <string name="facebook_app_id">1379926450534196</string>
+    <string name="fb_login_protocol_scheme">fb1379926450534196</string>
+    <string name="facebook_client_token">17aa6d7723a10dbca96c3e4a266af7c2</string>
 </resources>
