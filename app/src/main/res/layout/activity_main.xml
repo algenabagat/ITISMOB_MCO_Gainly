@@ -145,13 +145,6 @@
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/facebook_app_round_white_icon" />
 
-            <ImageButton
-                android:id="@+id/instagramBtn"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:background="#00FFFFFF"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/instagram_circle" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
