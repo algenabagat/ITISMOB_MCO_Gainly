@@ -58,10 +58,11 @@
         app:layout_constraintTop_toBottomOf="@+id/userNameTxv" />
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="340dp"
-        android:layout_height="383dp"
+        android:layout_height="375dp"
         android:layout_marginStart="35dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="30dp"
         android:layout_marginEnd="36dp"
         android:background="@drawable/back_gray_border"
         android:gravity="center"
@@ -132,11 +133,26 @@
             android:id="@+id/saveBtn"
             android:layout_width="320dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="25dp"
             android:background="@drawable/rounded_corner_container"
             android:backgroundTint="#000000"
             android:text="SAVE CHANGES"
             android:textColor="@color/white" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/logoutBtn"
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="36dp"
+        android:background="@drawable/back_gray_border"
+        android:backgroundTint="#F43333"
+        android:text="LOGOUT"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
