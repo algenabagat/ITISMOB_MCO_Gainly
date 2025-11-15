@@ -1,0 +1,113 @@
+Privacy Policy for Gainly
+Last Updated: 11/15/25
+
+1. Introduction
+Gainly ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application Gainly (the "App").
+
+Please read this Privacy Policy carefully. By using the App, you consent to the practices described in this policy.
+
+2. Information We Collect
+Personal Information
+We may collect the following personal information:
+
+Account Information: Email address, username, and password when you create an account
+
+Profile Data: Height, weight, age, gender, and fitness goals
+
+Workout Data: Exercise routines, sets, reps, weights, personal records, and workout history
+
+Health Information: Workout performance metrics, progress tracking data, and fitness achievements
+
+Usage Information
+App Usage: Features you use, time spent in the app, and preferences
+
+Device Information: Device type, operating system, and app version
+
+Performance Data: Crash reports and performance metrics
+
+3. How We Use Your Information
+We use the collected information for the following purposes:
+
+To provide and maintain the App's functionality
+
+To create and manage your personal fitness profile
+
+To track your workout progress and provide personalized recommendations
+
+To improve our App and develop new features
+
+To communicate with you about app updates, features, and support
+
+To ensure the security and integrity of our services
+
+To comply with legal obligations
+
+4. Data Storage and Security
+Local Storage
+Workout data, exercise routines, and personal records are stored locally on your device
+
+You are responsible for maintaining the security of your device
+
+Cloud Storage
+If you create an account, your data may be synced to secure cloud servers (Firebase)
+
+We implement appropriate technical and organizational security measures to protect your data
+
+Data Retention
+We retain your personal information for as long as necessary to provide our services
+
+You can delete your account and associated data at any time through the app settings
+
+5. Data Sharing and Disclosure
+We do not sell, trade, or rent your personal information to third parties. We may share your information in the following circumstances:
+
+Service Providers: With trusted third-party service providers who assist us in operating the App (e.g., cloud storage providers, analytics services)
+
+Legal Requirements: When required by law or to protect our rights, safety, or property
+
+Business Transfers: In connection with a merger, acquisition, or sale of assets
+
+With Your Consent: When you explicitly consent to share your information
+
+6. Third-Party Services
+The App may contain links to third-party websites or services. This Privacy Policy does not apply to third-party services, and we are not responsible for their privacy practices. We encourage you to review their privacy policies.
+
+7. Your Rights and Choices
+You have the following rights regarding your personal information:
+
+Access: View and access your personal data
+
+Correction: Update or correct inaccurate information
+
+Deletion: Delete your account and associated data
+
+Export: Request a copy of your data in a portable format
+
+Opt-out: Opt-out of marketing communications
+
+8. Children's Privacy
+The App is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us.
+
+9. International Data Transfers
+Your information may be transferred to and maintained on computers located outside of your state, province, country, or other governmental jurisdiction where data protection laws may differ.
+
+10. Changes to This Privacy Policy
+We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.
+
+11. Your California Privacy Rights
+California residents have the right to request information regarding the disclosure of their personal information to third parties for direct marketing purposes.
+
+12. Contact Us
+If you have any questions about this Privacy Policy, please contact us at:
+
+Email: michael_aaron_luyun@dlsu.edu.ph
+
+13. Consent
+By using Gainly, you consent to our Privacy Policy and agree to its terms.
+
+Additional Sections for Specific Features:
+Health Data
+"If you choose to connect Gainly with health apps or devices (such as Apple HealthKit, Google Fit, or wearable devices), we will only access and use health data that you explicitly authorize. This data will be used solely to provide fitness tracking features and will not be shared with third parties without your explicit consent."
+
+Analytics and Cookies
+"We use analytics services to understand how users interact with our App. This helps us improve user experience. The data collected is aggregated and anonymized."
