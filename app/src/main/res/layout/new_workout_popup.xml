@@ -134,7 +134,7 @@
         app:layout_constraintTop_toBottomOf="@+id/descriptionEtx" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView2"
+        android:id="@+id/workoutListRecycler"
         android:layout_width="355dp"
         android:layout_height="189dp"
         android:layout_marginStart="18dp"
@@ -158,5 +158,5 @@
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recyclerView2" />
+        app:layout_constraintTop_toBottomOf="@+id/workoutListRecycler" />
 </androidx.constraintlayout.widget.ConstraintLayout>
