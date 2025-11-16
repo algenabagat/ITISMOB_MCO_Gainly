@@ -14,28 +14,37 @@ import androidx.recyclerview.widget.RecyclerView
 class MainActivity : BaseActivity() {
 
     private lateinit var workoutAdapter: WorkoutAdapter
-    private val workoutList = ArrayList<Workout>()
+    // REMOVED: private val workoutList = ArrayList<Workout>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_page)
+
+        // Load data FIRST
+        loadSampleData()
+
+        // Then setup UI that depends on the data
         setupRecyclerView()
         setupClickListeners()
         scrollToTop()
-        addSampleWorkouts() // sample data
     }
 
     private fun setupRecyclerView() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+        // FIX: Pass the manager's list directly to the adapter
         workoutAdapter = WorkoutAdapter(
-            workouts = workoutList,
+            workouts = WorkoutDataManager.workouts,
             onExerciseClick = { exercise ->
                 showExerciseDetailDialog(exercise)
             },
-            onStartWorkout = { workout ->
+            onStartWorkout = { position ->
+                // FIX: Get the workout from the single source of truth
+                val workout = WorkoutDataManager.workouts[position]
                 startWorkout(workout)
             },
-            onFavoriteToggle = { workout, isFavorite ->
+            onFavoriteToggle = { position, isFavorite ->
+                // FIX: Get the workout from the single source of truth
+                val workout = WorkoutDataManager.workouts[position]
                 toggleFavorite(workout, isFavorite)
             }
         )
@@ -48,6 +57,18 @@ class MainActivity : BaseActivity() {
         val newWorkoutBtn = findViewById<Button>(R.id.newWorkoutBtn)
         newWorkoutBtn.setOnClickListener {
             showNewWorkoutDialog()
+        }
+    }
+
+    // Function to start the workout tracking
+    private fun startWorkout(workout: Workout) {
+        val workoutPosition = WorkoutDataManager.workouts.indexOf(workout)
+        if (workoutPosition != -1) {
+            val intent = Intent(this, WorkoutTrackingActivity::class.java)
+            intent.putExtra("workout_position", workoutPosition)
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "Workout not found!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -76,7 +97,6 @@ class MainActivity : BaseActivity() {
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         val exerciseNameTv = dialog.findViewById<TextView>(R.id.workoutTv)
-        // val exerciseImageIv = dialog.findViewById<ImageView>(R.id.exerciseImageIv) // not being used yet
         val exerciseDescriptionTv = dialog.findViewById<TextView>(R.id.exerciseDescriptionTv)
         val targetMuscleTv = dialog.findViewById<TextView>(R.id.targetMuscleTv)
         val closeBtn = dialog.findViewById<ImageButton>(R.id.closeBtn)
@@ -93,9 +113,6 @@ class MainActivity : BaseActivity() {
             targetMuscleTv.text = exercise.targetMuscle
         }
 
-        // Set the exercise image WIP
-        // exerciseImageIv.setImageResource(exercise.imageResId)
-
         closeBtn?.setOnClickListener {
             dialog.dismiss()
         }
@@ -103,108 +120,74 @@ class MainActivity : BaseActivity() {
         dialog.show()
     }
 
-    private fun startWorkout(workout: Workout) {
-        val intent = Intent(this, WorkoutTrackingActivity::class.java)
-        intent.putExtra("workout", workout)
-        startActivity(intent)
-    }
-
     private fun toggleFavorite(workout: Workout, isFavorite: Boolean) {
-        val index = workoutList.indexOfFirst { it.name == workout.name }
-        if (index != -1) {
+        val position = WorkoutDataManager.workouts.indexOf(workout)
+        if (position != -1) {
             val updatedWorkout = workout.copy(isFavorite = isFavorite)
-            workoutList[index] = updatedWorkout
-            workoutAdapter.updateWorkouts(workoutList)
+            WorkoutDataManager.workouts[position] = updatedWorkout
+
+            // The adapter is already pointing to this list, so just notify it
+            workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)
 
             val message = if (isFavorite) "Added to favorites" else "Removed from favorites"
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun addSampleWorkouts() {
-        // sample workout data with detailed exercises
-        workoutList.add(
-            Workout(
-                name = "Leg Day",
-                description = "Complete lower body workout",
-                exercises = listOf(
-                    Exercise(
-                        name = "Squats",
-                        description = "Stand with feet shoulder-width apart, lower your body as if sitting in a chair, then return to standing position.",
-                        targetMuscle = "Quadriceps, Glutes, Hamstrings",
-                        sets = 4,
-                        reps = 12,
-                        lastWeight = 60.0,
-                        personalBest = 70.0
+    private fun loadSampleData() {
+        if (WorkoutDataManager.workouts.isEmpty()) {
+            WorkoutDataManager.workouts.addAll(
+                listOf(
+                    Workout(
+                        id = Workout.generateId(),
+                        name = "Leg Day",
+                        description = "Complete lower body workout",
+                        exercises = listOf(
+                            Exercise(
+                                id = Exercise.generateId(),
+                                name = "Squats",
+                                description = "Stand with feet shoulder-width apart...",
+                                targetMuscle = "Quadriceps, Glutes, Hamstrings",
+                                defaultSets = 4,
+                                defaultReps = 12
+                            ),
+                            Exercise(
+                                id = Exercise.generateId(),
+                                name = "Romanian Deadlift",
+                                description = "Hold a barbell or dumbbells...",
+                                targetMuscle = "Hamstrings, Glutes",
+                                defaultSets = 3,
+                                defaultReps = 10
+                            )
+                        )
                     ),
-                    Exercise(
-                        name = "Romanian Deadlift",
-                        description = "Hold a barbell or dumbbells, hinge at your hips while keeping your back straight, lower the weight, then return to standing.",
-                        targetMuscle = "Hamstrings, Glutes",
-                        sets = 3,
-                        reps = 10,
-                        lastWeight = 100.0,
-                        personalBest = 120.0
-                    ),
-                    Exercise(
-                        name = "Lunges",
-                        description = "Step forward with one leg, lower your hips until both knees are bent at 90-degree angles, then return to starting position.",
-                        targetMuscle = "Quadriceps, Glutes",
-                        sets = 3,
-                        reps = 10,
-                        lastWeight = 100.0,
-                        personalBest = 120.0
-                    ),
-                    Exercise(
-                        name = "Calf Raises",
-                        description = "Stand with feet hip-width apart, raise your heels off the ground, then lower them back down.",
-                        targetMuscle = "Calves",
-                        sets = 4,
-                        reps = 15,
-                        lastWeight = 100.0,
-                        personalBest = 120.0
+                    Workout(
+                        id = Workout.generateId(),
+                        name = "Upper Body",
+                        description = "Chest and back focus",
+                        exercises = listOf(
+                            Exercise(
+                                id = Exercise.generateId(),
+                                name = "Bench Press",
+                                description = "Lie on a flat bench...",
+                                targetMuscle = "Chest, Triceps, Shoulders",
+                                defaultSets = 4,
+                                defaultReps = 8
+                            ),
+                            Exercise(
+                                id = Exercise.generateId(),
+                                name = "Pull-ups",
+                                description = "Hang from a bar with palms facing away...",
+                                targetMuscle = "Back, Biceps",
+                                defaultSets = 3,
+                                defaultReps = 6
+                            )
+                        )
                     )
                 )
             )
-        )
-
-        workoutList.add(
-            Workout(
-                name = "Upper Body",
-                description = "Chest and back focus",
-                exercises = listOf(
-                    Exercise(
-                        name = "Bench Press",
-                        description = "Lie on a flat bench, lower the barbell to your chest, then press it back up to starting position.",
-                        targetMuscle = "Chest, Triceps, Shoulders",
-                        sets = 4,
-                        reps = 8,
-                        lastWeight = 165.0,
-                        personalBest = 215.0
-                    ),
-                    Exercise(
-                        name = "Pull-ups",
-                        description = "Hang from a bar with palms facing away, pull your body up until your chin is above the bar, then lower yourself down.",
-                        targetMuscle = "Back, Biceps",
-                        sets = 3,
-                        reps = 6,
-                        lastWeight = 40.0,
-                        personalBest = 50.0
-                    ),
-                    Exercise(
-                        name = "Shoulder Press",
-                        description = "Sit or stand with dumbbells at shoulder height, press them overhead until arms are fully extended, then lower back down.",
-                        targetMuscle = "Shoulders, Triceps",
-                        sets = 3,
-                        reps = 10,
-                        lastWeight = 50.0,
-                        personalBest = 60.0
-                    )
-                )
-            )
-        )
-
-        workoutAdapter.updateWorkouts(workoutList)
+        }
+        // No longer need to call workoutAdapter.updateWorkouts here if setupRecyclerView is called after
     }
 
     private fun scrollToTop() {
@@ -213,6 +196,4 @@ class MainActivity : BaseActivity() {
             scrollView.scrollTo(0, 0)
         }
     }
-
-
 }

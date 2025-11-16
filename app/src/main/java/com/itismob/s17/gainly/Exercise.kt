@@ -1,14 +1,16 @@
 package com.itismob.s17.gainly
-
-import java.io.Serializable
-
 data class Exercise(
+    val id: String = "", // For Firebase/SQLite
     val name: String,
     val description: String,
-    val imageResId: Int = R.drawable.gainly_logo,
     val targetMuscle: String,
-    var sets: Int = 3,
-    var reps: Int = 10,
-    var lastWeight: Double = 0.0,
-    var personalBest: Double = 0.0
-) : Serializable
+    val category: String = "",
+    val defaultSets: Int = 3,
+    val defaultReps: Int = 10,
+    val imageResId: Int = R.drawable.gainly_logo
+) {
+    // Helper to create consistent IDs
+    companion object {
+        fun generateId(): String = "exercise_${System.currentTimeMillis()}"
+    }
+}

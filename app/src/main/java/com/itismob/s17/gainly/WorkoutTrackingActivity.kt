@@ -4,7 +4,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
-import android.widget.*
+import androidx.compose.ui.semantics.setText
+import androidx.compose.ui.semantics.text
+import androidx.core.graphics.blue
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
@@ -14,10 +22,11 @@ class WorkoutTrackingActivity : AppCompatActivity() {
     private lateinit var workoutNameTv: TextView
     private lateinit var exercisesContainer: LinearLayout
     private lateinit var nextBtn: Button
-    private lateinit var cancelWorkoutBtn : Button
+    private lateinit var cancelWorkoutBtn: Button
 
     private var timer: CountDownTimer? = null
     private var secondsElapsed = 0L
+    private lateinit var currentSession: WorkoutSession
     private var currentWorkout: Workout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,11 +45,12 @@ class WorkoutTrackingActivity : AppCompatActivity() {
         nextBtn = findViewById(R.id.nextBtn)
         cancelWorkoutBtn = findViewById(R.id.cancelWorkoutBtn)
 
+        // Initially disable the next button until at least one set is completed
+        nextBtn.isEnabled = false
         nextBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.gray))
 
         nextBtn.setOnClickListener {
-            Toast.makeText(this, "Workout completed! Progress saved.", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, FinishWorkoutSummaryActivity::class.java))
+            completeWorkout()
         }
 
         cancelWorkoutBtn.setOnClickListener {
@@ -50,16 +60,30 @@ class WorkoutTrackingActivity : AppCompatActivity() {
     }
 
     private fun setupWorkout() {
-        currentWorkout = intent.getSerializableExtra("workout") as? Workout
-        workoutNameTv.text = currentWorkout?.name ?: "Workout"
+        // Get position from intent and start workout session
+        val workoutPosition = intent.getIntExtra("workout_position", -1)
+        if (workoutPosition == -1) {
+            Toast.makeText(this, "Error: Workout not found.", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+        currentSession = WorkoutDataManager.startWorkoutSession(workoutPosition)
+        currentWorkout = WorkoutDataManager.getWorkout(workoutPosition)
 
+        workoutNameTv.text = currentSession.workoutName
+
+        // Redraw all exercises. This is a simple way to refresh the entire UI.
+        redrawAllExerciseViews()
+    }
+
+    private fun redrawAllExerciseViews() {
         exercisesContainer.removeAllViews()
-        currentWorkout?.exercises?.forEach { exercise ->
-            addExerciseView(exercise)
+        currentSession.exerciseSessions.forEachIndexed { exerciseIndex, exerciseSession ->
+            addExerciseView(exerciseSession, exerciseIndex)
         }
     }
 
-    private fun addExerciseView(exercise: Exercise) {
+    private fun addExerciseView(exerciseSession: ExerciseSession, exerciseIndex: Int) {
         val exerciseView = LayoutInflater.from(this)
             .inflate(R.layout.exercise_tracking_item, exercisesContainer, false)
 
@@ -67,25 +91,41 @@ class WorkoutTrackingActivity : AppCompatActivity() {
         val setsContainer = exerciseView.findViewById<LinearLayout>(R.id.setsContainer)
         val addSetBtn = exerciseView.findViewById<Button>(R.id.addSetBtn)
 
-        exerciseNameTv.text = exercise.name
+        exerciseNameTv.text = exerciseSession.exerciseName
 
-        val sets = mutableListOf<ExerciseSet>()
-
-        repeat(exercise.sets) { setIndex ->
-            val set = addSetView(setsContainer, exercise, setIndex + 1)
-            sets.add(set)
+        // Add views for existing sets
+        exerciseSession.sets.forEachIndexed { setIndex, _ ->
+            addSetView(setsContainer, exerciseIndex, setIndex)
         }
 
-
         addSetBtn.setOnClickListener {
-            val newSet = addSetView(setsContainer, exercise, setsContainer.childCount + 1)
-            sets.add(newSet)
+            // Create a new set record
+            val newSetRecord = SetRecord(
+                setNumber = exerciseSession.sets.size + 1,
+                weight = 0.0, // Or use previous weight as default
+                reps = exerciseSession.targetReps,
+                completed = false
+            )
+
+            // Get the current exercise session, add the new set to its list
+            val updatedSets = exerciseSession.sets.toMutableList().apply { add(newSetRecord) }
+            val updatedExerciseSession = exerciseSession.copy(sets = updatedSets)
+
+            // Update the main session object
+            currentSession.exerciseSessions[exerciseIndex] = updatedExerciseSession
+
+            // Redraw the UI for this specific exercise to show the new set
+            addSetView(setsContainer, exerciseIndex, updatedSets.size - 1)
         }
 
         exercisesContainer.addView(exerciseView)
     }
 
-    private fun addSetView(setsContainer: LinearLayout, exercise: Exercise, setNumber: Int): ExerciseSet {
+    private fun addSetView(
+        setsContainer: LinearLayout,
+        exerciseIndex: Int,
+        setIndex: Int
+    ) {
         val setView = LayoutInflater.from(this)
             .inflate(R.layout.set_item, setsContainer, false)
 
@@ -95,53 +135,103 @@ class WorkoutTrackingActivity : AppCompatActivity() {
         val repsEditText = setView.findViewById<EditText>(R.id.repsEditText)
         val completedCheckbox = setView.findViewById<CheckBox>(R.id.completedCheckbox)
 
-        setNumberTv.text = "$setNumber."
+        // Get the specific exercise and set record from the current session state
+        val exerciseSession = currentSession.exerciseSessions[exerciseIndex]
+        val setRecord = exerciseSession.sets[setIndex]
 
-        previousWeightTv.text = exercise.lastWeight.toInt().toString()
+        setNumberTv.text = "${setRecord.setNumber}."
+        previousWeightTv.text = "${exerciseSession.targetWeight.toInt()} lbs"
 
-        repsEditText.setText(exercise.reps.toString())
+        weightEditText.setText(if (setRecord.weight > 0) setRecord.weight.toInt().toString() else "")
+        repsEditText.setText(setRecord.reps.toString())
+        completedCheckbox.isChecked = setRecord.completed
 
-        val exerciseSet = ExerciseSet(
-            setNumber = setNumber,
-            weight = exercise.lastWeight,
-            reps = exercise.reps,
-            previousWeight = exercise.lastWeight
-        )
+        // --- Event Listeners to update the session state ---
+        val updateSetRecord: () -> Unit = {
+            val weight = weightEditText.text.toString().toDoubleOrNull() ?: 0.0
+            val reps = repsEditText.text.toString().toIntOrNull() ?: 0
+            val isChecked = completedCheckbox.isChecked
 
-        weightEditText.setText(exercise.lastWeight.toInt().toString())
+            // Create a new updated set record
+            val updatedSet = setRecord.copy(weight = weight, reps = reps, completed = isChecked)
+
+            // Update the list of sets in the exercise session
+            val updatedSets = exerciseSession.sets.toMutableList()
+            updatedSets[setIndex] = updatedSet
+            currentSession.exerciseSessions[exerciseIndex] = exerciseSession.copy(sets = updatedSets)
+            checkWorkoutCompletionState()
+        }
 
         weightEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val weight = weightEditText.text.toString().toDoubleOrNull() ?: 0.0
-                exerciseSet.weight = weight
-                if (weight > 0 && !completedCheckbox.isChecked) {
-                    completedCheckbox.isChecked = true
-                }
-            }
+            if (!hasFocus) updateSetRecord()
         }
 
         repsEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val reps = repsEditText.text.toString().toIntOrNull() ?: 0
-                exerciseSet.reps = reps
-                if (reps > 0 && !completedCheckbox.isChecked) {
-                    completedCheckbox.isChecked = true
+            if (!hasFocus) updateSetRecord()
+        }
+
+        completedCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            // Auto-fill values when checkbox is checked
+            if (isChecked) {
+                if (weightEditText.text.isNullOrEmpty()) {
+                    weightEditText.setText(exerciseSession.targetWeight.toInt().toString())
+                }
+                if (repsEditText.text.isNullOrEmpty() || repsEditText.text.toString() == "0") {
+                    repsEditText.setText(exerciseSession.targetReps.toString())
+                }
+            }
+            updateSetRecord()
+        }
+
+        setsContainer.addView(setView)
+    }
+
+    private fun checkWorkoutCompletionState() {
+        val anySetCompleted = currentSession.exerciseSessions.any { ex -> ex.sets.any { it.completed } }
+        nextBtn.isEnabled = anySetCompleted
+        if (anySetCompleted) {
+            nextBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.gray))
+        } else {
+            nextBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.gray))
+        }
+    }
+
+    private fun completeWorkout() {
+        // Mark session as completed
+        currentSession.completed = true
+        currentSession.duration = secondsElapsed
+
+        saveWorkoutSession()
+
+        // Calculate completion stats for the toast message
+        val totalSets = currentSession.exerciseSessions.sumOf { it.sets.size }
+        val completedSets = currentSession.exerciseSessions.sumOf { ex -> ex.sets.count { it.completed } }
+        Toast.makeText(this, "Workout completed! $completedSets/$totalSets sets done.", Toast.LENGTH_SHORT).show()
+
+        // Go to summary screen
+        val intent = Intent(this, FinishWorkoutSummaryActivity::class.java)
+        intent.putExtra("session_id", currentSession.id)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun saveWorkoutSession() {
+        // This function would contain logic to save to SQLite and Firebase.
+        // For now, the session is updated in WorkoutDataManager.
+        WorkoutDataManager.saveWorkoutSession(currentSession)
+
+        // Update exercise personal bests if needed
+        currentSession.exerciseSessions.forEach { exerciseSession ->
+            val bestSet = exerciseSession.getBestSet()
+            bestSet?.let { set ->
+                if (set.weight > 0) {
+                    // Here you would implement logic to update a global personal best record
                 }
             }
         }
 
-        completedCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            exerciseSet.completed = isChecked
-            if (!isChecked) {
-                weightEditText.setText("")
-                repsEditText.setText(exercise.reps.toString())
-                exerciseSet.weight = 0.0
-                exerciseSet.reps = exercise.reps
-            }
-        }
-
-        setsContainer.addView(setView)
-        return exerciseSet
+        val message = "Workout saved! Total volume: ${currentSession.totalVolume} lbs"
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     private fun startTimer() {
@@ -150,7 +240,6 @@ class WorkoutTrackingActivity : AppCompatActivity() {
                 secondsElapsed++
                 updateTimerText()
             }
-
             override fun onFinish() {}
         }.start()
     }
