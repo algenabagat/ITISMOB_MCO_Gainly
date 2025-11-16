@@ -1,7 +1,11 @@
 package com.itismob.s17.gainly
 
+import android.Manifest
 import android.app.Dialog
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
@@ -14,16 +18,37 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
 
     private lateinit var planAdapter: PlanAdapter
     private val planList = ArrayList<Plan>()
+    private lateinit var notificationHelper: NotificationHelper
 
     private var dateButtonToUpdate: Button? = null
     private var timeButtonToUpdate: Button? = null
+    private val NOTIFICATION_PERMISSION_CODE = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.plan_layout)
+        notificationHelper = NotificationHelper(this)
+        notificationHelper.createNotificationChannel()
+        requestNotificationPermission()
         setupRecyclerView()
         setupClickListeners()
         addSamplePlans()
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    NOTIFICATION_PERMISSION_CODE
+                )
+            }
+        }
     }
 
     private fun setupRecyclerView() {
@@ -103,6 +128,59 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
     }
 
     private fun addSamplePlans() {
+
+        planList.add(
+            Plan(
+                year = 2025,
+                month = 11,
+                day = 16,
+                hour = 16,
+                minute = 20,
+                workout =
+                    Workout(
+                        name = "Leg Day",
+                        description = "Complete lower body workout",
+                        exercises = listOf(
+                            Exercise(
+                                name = "Squats",
+                                description = "Stand with feet shoulder-width apart, lower your body as if sitting in a chair, then return to standing position.",
+                                targetMuscle = "Quadriceps, Glutes, Hamstrings",
+                                sets = 4,
+                                reps = 12,
+                                lastWeight = 60.0,
+                                personalBest = 70.0
+                            ),
+                            Exercise(
+                                name = "Romanian Deadlift",
+                                description = "Hold a barbell or dumbbells, hinge at your hips while keeping your back straight, lower the weight, then return to standing.",
+                                targetMuscle = "Hamstrings, Glutes",
+                                sets = 3,
+                                reps = 10,
+                                lastWeight = 100.0,
+                                personalBest = 120.0
+                            ),
+                            Exercise(
+                                name = "Lunges",
+                                description = "Step forward with one leg, lower your hips until both knees are bent at 90-degree angles, then return to starting position.",
+                                targetMuscle = "Quadriceps, Glutes",
+                                sets = 3,
+                                reps = 10,
+                                lastWeight = 100.0,
+                                personalBest = 120.0
+                            ),
+                            Exercise(
+                                name = "Calf Raises",
+                                description = "Stand with feet hip-width apart, raise your heels off the ground, then lower them back down.",
+                                targetMuscle = "Calves",
+                                sets = 4,
+                                reps = 15,
+                                lastWeight = 100.0,
+                                personalBest = 120.0
+                            )
+                        )
+                    )
+            )
+        )
 
         planAdapter.updatePlans(planList)
     }
