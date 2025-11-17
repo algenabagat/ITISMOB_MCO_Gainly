@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : BaseActivity() {
@@ -25,12 +26,15 @@ class MainActivity : BaseActivity() {
     private lateinit var workoutAdapter: WorkoutAdapter
     private lateinit var firestore: FirebaseFirestore
 
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_page)
 
         // Initialize Firestore
         firestore = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance()
 
         // Setup UI and load data
         setupRecyclerView()
@@ -152,12 +156,16 @@ class MainActivity : BaseActivity() {
                 configuredExercises.add(exercise.copy(defaultSets = sets, defaultReps = reps))
             }
 
+            val currentUser = auth.currentUser
+            val userEmail = currentUser?.email ?: "unknown"
+
             val newWorkout = Workout(
                 id = Workout.generateId(),
                 name = name,
                 description = description,
                 exercises = configuredExercises, // Use the list with user-defined sets/reps
-                isFavorite = false
+                isFavorite = false,
+                createdBy = "$userEmail"
             )
 
             // 1. Save to Firebase
@@ -228,39 +236,55 @@ class MainActivity : BaseActivity() {
     }
 
     private fun saveWorkoutToFirestore(workout: Workout) {
-        firestore.collection("workouts").document(workout.id)
+        firestore.collection("user-saved-workouts").document(workout.id)
             .set(workout)
             .addOnSuccessListener {
                 Log.d("Firestore", "Workout ${workout.id} successfully written!")
             }
             .addOnFailureListener { e ->
-                Log.w("Firestore", "Error writing document", e)
-                Toast.makeText(this, "Failed to save workout to cloud.", Toast.LENGTH_SHORT).show()
+                Log.e("Firestore", "Error writing workout: ${e.message}")
+                Log.e("Firestore", "Workout data: $workout")
+                e.printStackTrace()
+                Toast.makeText(this, "Failed to save workout to cloud: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 
     private fun fetchWorkoutsFromFirestore() {
-        firestore.collection("workouts")
+        val currentUser = auth.currentUser
+        val userEmail = currentUser?.email
+
+        firestore.collection("user-saved-workouts")
             .get()
             .addOnSuccessListener { result ->
-                if (result.isEmpty) {
-                    // No workouts in Firestore, so load local sample data as a fallback
-                    loadSampleData()
-                    return@addOnSuccessListener
+                val userWorkouts = mutableListOf<Workout>()
+                val gainlyWorkouts = mutableListOf<Workout>()
+
+                for (document in result) {
+                    try {
+                        val workout = document.toObject(Workout::class.java)
+                        when (workout.createdBy) {
+                            userEmail -> userWorkouts.add(workout)
+                            "Gainly" -> gainlyWorkouts.add(workout)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("Firestore", "Error parsing document ${document.id}: ${e.message}")
+                    }
                 }
 
-                val fetchedWorkouts = result.toObjects(Workout::class.java)
-                WorkoutDataManager.workouts.clear()
-                WorkoutDataManager.workouts.addAll(fetchedWorkouts)
+                val allWorkouts = userWorkouts + gainlyWorkouts
 
-                // Update adapter with fetched data
-                workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)
-                Log.d("Firestore", "Successfully fetched ${fetchedWorkouts.size} workouts.")
+                if (allWorkouts.isEmpty()) {
+                    loadSampleData()
+                } else {
+                    WorkoutDataManager.workouts.clear()
+                    WorkoutDataManager.workouts.addAll(allWorkouts)
+                    workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)
+                    Log.d("Firestore", "Loaded ${userWorkouts.size} user workouts + ${gainlyWorkouts.size} Gainly workouts")
+                }
             }
             .addOnFailureListener { exception ->
-                Log.w("Firestore", "Error getting documents: ", exception)
+                Log.e("Firestore", "Error getting documents: ", exception)
                 Toast.makeText(this, "Failed to load workouts from cloud.", Toast.LENGTH_SHORT).show()
-                // Load local sample data as a fallback
                 loadSampleData()
             }
     }
@@ -292,7 +316,7 @@ class MainActivity : BaseActivity() {
             WorkoutDataManager.workouts[position] = updatedWorkout
 
             // Also update this change in Firestore
-            firestore.collection("workouts").document(workout.id)
+            firestore.collection("user-saved-workouts").document(workout.id)
                 .update("favorite", isFavorite)
                 .addOnFailureListener {
                     // Optionally revert the change and notify user
@@ -323,7 +347,8 @@ class MainActivity : BaseActivity() {
                 exercises = listOf(
                     Exercise(id = "ex_squats", name = "Squats", description = "...", targetMuscle = "Quadriceps, Glutes", defaultSets = 4, defaultReps = 12),
                     Exercise(id = "ex_rdl", name = "Romanian Deadlift", description = "...", targetMuscle = "Hamstrings, Glutes", defaultSets = 3, defaultReps = 10)
-                )
+                ),
+                createdBy = "Gainly"
             ),
             Workout(
                 id = "sample_upper_body",
@@ -332,7 +357,8 @@ class MainActivity : BaseActivity() {
                 exercises = listOf(
                     Exercise(id = "ex_bench", name = "Bench Press", description = "...", targetMuscle = "Chest, Triceps", defaultSets = 4, defaultReps = 8),
                     Exercise(id = "ex_pullups", name = "Pull-ups", description = "...", targetMuscle = "Back, Biceps", defaultSets = 3, defaultReps = 6)
-                )
+                ),
+                createdBy = "Gainly"
             )
         )
     }

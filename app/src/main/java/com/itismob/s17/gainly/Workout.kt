@@ -7,8 +7,10 @@ data class Workout(
     val exercises: List<Exercise>,
     val isFavorite: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
-    val createdBy: String = "user" // For multi-user support later
+    val createdBy: String = ""
 ) {
+
+    constructor() : this("", "", "", emptyList(), false,System.currentTimeMillis(), "")
     val exerciseCount: Int get() = exercises.size
 
     companion object {

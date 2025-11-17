@@ -9,6 +9,8 @@ data class Exercise(
     val defaultReps: Int = 10,
     val imageResId: Int = R.drawable.gainly_logo
 ) {
+
+    constructor() : this("", "", "", "", "", 3, 10)
     // Helper to create consistent IDs
     companion object {
         fun generateId(): String = "exercise_${System.currentTimeMillis()}"
