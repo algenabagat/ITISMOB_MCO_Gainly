@@ -2,10 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
     android:background="@drawable/back_gray_border"
+    android:backgroundTint="@color/white"
     android:orientation="vertical"
-    android:padding="12dp"
-    android:layout_marginBottom="8dp">
+    android:padding="12dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -44,34 +45,41 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Default Sets:"
-            android:textColor="@color/black"/>
+            android:textColor="@color/black" />
 
         <EditText
             android:id="@+id/defaultSetsEtx"
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:backgroundTint="@color/gray_light"
             android:hint="e.g. 3"
             android:inputType="number"
+            android:outlineProvider="none"
             android:text="3"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:text="Default Reps:"
-            android:textColor="@color/black"/>
+            android:textColor="@color/black" />
 
         <EditText
             android:id="@+id/defaultRepsEtx"
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:backgroundTint="@color/gray_light"
             android:hint="e.g. 10"
             android:inputType="number"
             android:text="10"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray" />
 
     </LinearLayout>
 
