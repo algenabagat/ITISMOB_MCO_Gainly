@@ -33,7 +33,7 @@ class PlanAdapter(
     override fun onBindViewHolder(holder: PlanViewHolder, position: Int) {
         val plan = plans[position]
 
-        holder.planNameTv.text = plan.workoutName
+        holder.planNameTv.text = plan.workout.name
         val formattedMonth = String.format(Locale.US, "%02d", plan.month + 1)
         val formattedDay = String.format(Locale.US, "%02d", plan.day)
         val formattedDate = "$formattedMonth/$formattedDay/${plan.year}"
