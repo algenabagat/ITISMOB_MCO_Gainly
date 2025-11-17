@@ -7,10 +7,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class SelectedExercisesAdapter(
-    private var exercises: MutableList<Exercise>,
-    private val onRemoveClick: (Exercise) -> Unit
-) : RecyclerView.Adapter<SelectedExercisesAdapter.SelectedExerciseViewHolder>() {
+class SelectedExercisesAdapter(private var exercises: MutableList<Exercise>,private val onRemoveClick: (Exercise) -> Unit) : RecyclerView.Adapter<SelectedExercisesAdapter.SelectedExerciseViewHolder>() {
 
     // This ViewHolder holds the views for a single item.
     inner class SelectedExerciseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

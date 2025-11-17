@@ -4,6 +4,9 @@ import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -14,6 +17,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
+import android.view.LayoutInflater
+import android.widget.LinearLayout
 
 class MainActivity : BaseActivity() {
 
@@ -151,18 +156,49 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showExerciseSelectionDialog(onExerciseSelected: (Exercise) -> Unit) {
-        // Here, we create a sample list of exercises. In a real app, you would fetch this
-        // from a master list in Firestore or a local database.
-        val allExercises = createMasterExerciseList()
-        val exerciseNames = allExercises.map { it.name }.toTypedArray()
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_select_exercise)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        AlertDialog.Builder(this)
-            .setTitle("Select an Exercise")
-            .setItems(exerciseNames) { _, which ->
-                onExerciseSelected(allExercises[which])
+        val spinner = dialog.findViewById<android.widget.Spinner>(R.id.muscleGroupSpinner)
+        val recyclerView = dialog.findViewById<RecyclerView>(R.id.allExercisesRecyclerView)
+
+        val allExercises = createMasterExerciseList()
+
+        // Setup Adapter for the RecyclerView
+        val allExercisesAdapter = AllExercisesAdapter(
+            allExercises = allExercises,
+            onExerciseClick = { selectedExercise ->
+                // This part stays the same: selects the exercise
+                onExerciseSelected(selectedExercise)
+                dialog.dismiss()
+            },
+            onInfoClick = { exerciseToShow ->
+                // This is the new part: shows the detail dialog
+                showExerciseDetailDialog(exerciseToShow)
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        )
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = allExercisesAdapter
+
+        // Setup Spinner
+        val muscleGroups = listOf("All") + allExercises.map { it.targetMuscle }.distinct().sorted()
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, muscleGroups)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = spinnerAdapter
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedMuscleGroup = muscleGroups[position]
+                allExercisesAdapter.filterByMuscleGroup(selectedMuscleGroup)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Do nothing
+            }
+        }
+
+        dialog.show()
     }
 
     private fun saveWorkoutToFirestore(workout: Workout) {

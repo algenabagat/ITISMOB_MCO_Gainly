@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical">
+
+    <!-- Container for the exercise name and muscle group -->
+    <LinearLayout
+        android:id="@+id/exerciseTextContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/exerciseNameTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Exercise Name"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/muscleGroupTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Muscle Group"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <!-- Info Button -->
+    <ImageButton
+        android:id="@+id/exerciseInfoBtn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_question_mark"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Show exercise details"
+        android:layout_marginStart="8dp"/>
+
+</LinearLayout>
