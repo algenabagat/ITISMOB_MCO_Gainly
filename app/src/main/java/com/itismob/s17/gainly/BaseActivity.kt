@@ -30,6 +30,7 @@ open class BaseActivity : AppCompatActivity() {
         findViewById<View>(R.id.planBtn)?.setOnClickListener {
             if (this !is PlanActivity) {
                 startActivity(Intent(this, PlanActivity::class.java))
+                overridePendingTransition(0, 0)
                 finish() // Close current activity
             }
         }
@@ -37,6 +38,7 @@ open class BaseActivity : AppCompatActivity() {
         findViewById<View>(R.id.workoutBtn)?.setOnClickListener {
             if (this !is MainActivity) {
                 startActivity(Intent(this, MainActivity::class.java))
+                overridePendingTransition(0, 0)
                 finish() // Close current activity
             }
         }
@@ -44,6 +46,7 @@ open class BaseActivity : AppCompatActivity() {
         findViewById<View>(R.id.historyBtn)?.setOnClickListener {
             if (this !is HistoryActivity) {
                 startActivity(Intent(this, HistoryActivity::class.java))
+                overridePendingTransition(0, 0)
                 finish() // Close current activity
             }
         }
