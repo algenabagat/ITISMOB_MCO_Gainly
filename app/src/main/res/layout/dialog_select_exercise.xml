@@ -17,11 +17,12 @@
 
     <Spinner
         android:id="@+id/muscleGroupSpinner"
+        style="@style/Widget.AppCompat.Spinner.DropDown.ActionBar"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/gray"
-        android:foregroundTint="@color/gray"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/spinner_outline"
+        android:theme="@style/SpinnerTheme"
         android:prompt="@string/select_muscle_group" />
 
     <androidx.recyclerview.widget.RecyclerView
