@@ -1,14 +1,20 @@
 package com.itismob.s17.gainly
 
 data class ExerciseSession(
-    val exerciseId: String,
     val exerciseName: String,
-    val targetMuscle: String,
-    val sets: List<SetRecord>,
-    val targetReps: Int,
-    val targetWeight: Double,
-    var completed: Boolean = false,
+    val sets: List<ExerciseSet>,
+    var completed: Boolean = false
 ) {
-    fun getTotalVolume(): Double = sets.sumOf { it.getVolume() }
-    fun getBestSet(): SetRecord? = sets.maxByOrNull { it.weight }
+    fun getTotalVolume(): Double {
+        return sets.sumOf { it.weight * it.reps }
+    }
+
+//    currently not in use
+//    fun getMaxWeight(): Double {
+//        return sets.maxOfOrNull { it.weight } ?: 0.0
+//    }
+//
+//    fun getAllSetsCompleted(): Boolean {
+//        return sets.all { it.completed }
+//    }
 }

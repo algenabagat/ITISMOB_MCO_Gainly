@@ -1,8 +1,11 @@
 package com.itismob.s17.gainly
+
+import java.io.Serializable
+
 data class Exercise(
-    val id: String = "", // For Firebase/SQLite
     val name: String,
     val description: String,
+    val imageResId: Int = R.drawable.gainly_logo,
     val targetMuscle: String,
     val category: String = "",
     val defaultSets: Int = 3,

@@ -8,5 +8,4 @@
     <string name="facebook_app_id">1379926450534196</string>
     <string name="fb_login_protocol_scheme">fb1379926450534196</string>
     <string name="facebook_client_token">17aa6d7723a10dbca96c3e4a266af7c2</string>
-    <string name="select_muscle_group">Select Muscle Group</string>
 </resources>

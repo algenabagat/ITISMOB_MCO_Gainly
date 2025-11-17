@@ -11,8 +11,12 @@ import androidx.recyclerview.widget.RecyclerView
 class WorkoutAdapter(
     private var workouts: List<Workout> = ArrayList(),
     private val onExerciseClick: (Exercise) -> Unit = {},
-    private val onStartWorkout: (Int) -> Unit = {}, // Now takes position instead of Workout
-    private val onFavoriteToggle: (Int, Boolean) -> Unit =  { _, _ -> } // Now takes position instead of Workout } // Now takes position instead of Workout
+    private val onStartWorkout: (Workout) -> Unit = {},
+    private val onFavoriteToggle: (Workout, Boolean) -> Unit = { _, _ -> },
+
+    // not needed yet:
+    // private val onEditWorkout: (Workout) -> Unit = {},
+    // private val onDeleteWorkout: (Workout) -> Unit = {}
 ) : RecyclerView.Adapter<WorkoutViewHolder>() {
 
     fun updateWorkouts(newWorkouts: List<Workout>) {
@@ -36,10 +40,10 @@ class WorkoutAdapter(
 
         updateFavoriteButtonIcon(holder.favoriteBtn, workout.isFavorite)
 
-        // Pass position to favorite toggle
+        // basically updates the fav button state
         holder.favoriteBtn.setOnClickListener {
             val newFavoriteState = !workout.isFavorite
-            onFavoriteToggle(position, newFavoriteState) // Pass position instead of workout
+            onFavoriteToggle(workout, newFavoriteState)
             updateFavoriteButtonIcon(holder.favoriteBtn, newFavoriteState)
         }
 
@@ -49,7 +53,7 @@ class WorkoutAdapter(
         // add ALL exercises (no limit)
         workout.exercises.forEach { exercise ->
             val exerciseView = TextView(holder.itemView.context).apply {
-                text = "• ${exercise.name} (${exercise.defaultSets}x${exercise.defaultReps})" // Updated to use defaultSets/defaultReps
+                text = "• ${exercise.name} (${exercise.sets}x${exercise.reps})"
                 setTextColor(holder.itemView.context.getColor(android.R.color.black))
                 textSize = 12f
                 setOnClickListener {
@@ -59,13 +63,12 @@ class WorkoutAdapter(
             holder.exercisesLayout.addView(exerciseView)
         }
 
-        // Pass position to start workout
         holder.startBtn.setOnClickListener {
-            onStartWorkout(position) // Pass position instead of workout
+            onStartWorkout(workout)
         }
 
         holder.optionsBtn.setOnClickListener { view ->
-            showOptionsMenu(view, workout, holder, position)
+            showOptionsMenu(view, workout, holder)
         }
     }
 
@@ -77,7 +80,7 @@ class WorkoutAdapter(
         }
     }
 
-    private fun showOptionsMenu(view: View, workout: Workout, holder: WorkoutViewHolder, position: Int) {
+    private fun showOptionsMenu(view: View, workout: Workout, holder: WorkoutViewHolder) {
         val popup = PopupMenu(view.context, view)
         popup.menuInflater.inflate(R.menu.workout_option, popup.menu)
 
@@ -85,11 +88,11 @@ class WorkoutAdapter(
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.edit -> {
-                    // Can use position to edit: onEditWorkout(position)
+                    // onEditWorkout(workout)
                     true
                 }
                 R.id.delete -> {
-                    // Can use position to delete: onDeleteWorkout(position)
+                    // onDeleteWorkout(workout)
                     true
                 }
                 else -> false
