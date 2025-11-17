@@ -88,37 +88,27 @@ class MainActivity : BaseActivity() {
         val addExerciseBtn = dialog.findViewById<Button>(R.id.addExerciseBtn)
         val workoutNameEditText = dialog.findViewById<EditText>(R.id.workoutNameEtx)
         val descriptionEditText = dialog.findViewById<EditText>(R.id.descriptionEtx)
-        val exercisesContainer = dialog.findViewById<LinearLayout>(R.id.exercisesContainer)
+        val exercisesRecyclerView = dialog.findViewById<RecyclerView>(R.id.workoutListRecycler)
 
-        // A list to keep track of the added exercises and their views
         val selectedExercises = mutableListOf<Exercise>()
+// This line now correctly creates an instance of the adapter you just made.
+        val selectedExercisesAdapter = SelectedExercisesAdapter(selectedExercises) { exercise ->
+            // This lambda is the 'onRemoveClick' callback.
+            // It gets triggered when the remove button in the adapter is clicked.
+            selectedExercises.remove(exercise)
+            selectedExercisesAdapter.updateExercises(selectedExercises)
+        }
+        exercisesRecyclerView.layoutManager = LinearLayoutManager(this)
+        exercisesRecyclerView.adapter = selectedExercisesAdapter
+
         addExerciseBtn.setOnClickListener {
             showExerciseSelectionDialog { exercise ->
-                if (selectedExercises.any { it.id == exercise.id }) {
+                if (!selectedExercises.any { it.id == exercise.id }) {
+                    selectedExercises.add(exercise)
+                    selectedExercisesAdapter.updateExercises(selectedExercises)
+                } else {
                     Toast.makeText(this, "${exercise.name} is already in the list.", Toast.LENGTH_SHORT).show()
-                    return@showExerciseSelectionDialog
                 }
-
-                // Add to the tracking list
-                selectedExercises.add(exercise)
-
-                // Inflate and add the new configuration view
-                val exerciseConfigView = LayoutInflater.from(this)
-                    .inflate(R.layout.pre_config_exercise_item, exercisesContainer, false)
-
-                val exerciseNameTv = exerciseConfigView.findViewById<TextView>(R.id.exerciseNameTv)
-                val removeBtn = exerciseConfigView.findViewById<ImageButton>(R.id.removeExerciseBtn)
-
-                exerciseNameTv.text = exercise.name
-                // Store the view with the exercise object for later retrieval
-                exerciseConfigView.tag = exercise
-
-                removeBtn.setOnClickListener {
-                    selectedExercises.remove(exercise)
-                    exercisesContainer.removeView(exerciseConfigView)
-                }
-
-                exercisesContainer.addView(exerciseConfigView)
             }
         }
 
@@ -135,27 +125,11 @@ class MainActivity : BaseActivity() {
                 return@setOnClickListener
             }
 
-            // Now, we need to build the list of exercises WITH the configured sets/reps
-            val configuredExercises = mutableListOf<Exercise>()
-            for (i in 0 until exercisesContainer.childCount) {
-                val view = exercisesContainer.getChildAt(i)
-                val exercise = view.tag as Exercise
-
-                val setsEtx = view.findViewById<EditText>(R.id.defaultSetsEtx)
-                val repsEtx = view.findViewById<EditText>(R.id.defaultRepsEtx)
-
-                val sets = setsEtx.text.toString().toIntOrNull() ?: 3 // Default to 3 if empty/invalid
-                val reps = repsEtx.text.toString().toIntOrNull() ?: 10 // Default to 10 if empty/invalid
-
-                // Create a copy of the exercise with the new default values
-                configuredExercises.add(exercise.copy(defaultSets = sets, defaultReps = reps))
-            }
-
             val newWorkout = Workout(
                 id = Workout.generateId(),
                 name = name,
                 description = description,
-                exercises = configuredExercises, // Use the configured list
+                exercises = selectedExercises,
                 isFavorite = false
             )
 
@@ -168,6 +142,7 @@ class MainActivity : BaseActivity() {
             // 3. Notify adapter
             workoutAdapter.notifyItemInserted(0)
             findViewById<RecyclerView>(R.id.recyclerView).scrollToPosition(0)
+
 
             dialog.dismiss()
             Toast.makeText(this, "Workout '$name' created!", Toast.LENGTH_SHORT).show()
