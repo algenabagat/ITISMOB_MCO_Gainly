@@ -4,12 +4,14 @@ import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
@@ -17,13 +19,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
-import android.view.LayoutInflater
-import android.widget.LinearLayout
 
 class MainActivity : BaseActivity() {
 
     private lateinit var workoutAdapter: WorkoutAdapter
-    private lateinit var selectedExercisesAdapter: SelectedExercisesAdapter
     private lateinit var firestore: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,27 +87,40 @@ class MainActivity : BaseActivity() {
         val addExerciseBtn = dialog.findViewById<Button>(R.id.addExerciseBtn)
         val workoutNameEditText = dialog.findViewById<EditText>(R.id.workoutNameEtx)
         val descriptionEditText = dialog.findViewById<EditText>(R.id.descriptionEtx)
-        val exercisesRecyclerView = dialog.findViewById<RecyclerView>(R.id.workoutListRecycler)
+
+        val exercisesContainer = dialog.findViewById<LinearLayout>(R.id.exercisesContainer)
 
         val selectedExercises = mutableListOf<Exercise>()
-// This line now correctly creates an instance of the adapter you just made.
-        val selectedExercisesAdapter = SelectedExercisesAdapter(selectedExercises) { exercise ->
-            // This lambda is the 'onRemoveClick' callback.
-            // It gets triggered when the remove button in the adapter is clicked.
-            selectedExercises.remove(exercise)
-            selectedExercisesAdapter.updateExercises(selectedExercises)
-        }
-        exercisesRecyclerView.layoutManager = LinearLayoutManager(this)
-        exercisesRecyclerView.adapter = selectedExercisesAdapter
 
         addExerciseBtn.setOnClickListener {
             showExerciseSelectionDialog { exercise ->
-                if (!selectedExercises.any { it.id == exercise.id }) {
-                    selectedExercises.add(exercise)
-                    selectedExercisesAdapter.updateExercises(selectedExercises)
-                } else {
+                // Prevent adding the same exercise multiple times
+                if (selectedExercises.any { it.id == exercise.id }) {
                     Toast.makeText(this, "${exercise.name} is already in the list.", Toast.LENGTH_SHORT).show()
+                    return@showExerciseSelectionDialog
                 }
+
+                selectedExercises.add(exercise)
+
+                // Inflate the pre_config_exercise_item layout
+                val exerciseConfigView = LayoutInflater.from(this)
+                    .inflate(R.layout.pre_config_exercise_item, exercisesContainer, false)
+
+                val exerciseNameTv = exerciseConfigView.findViewById<TextView>(R.id.exerciseNameTv)
+                val removeBtn = exerciseConfigView.findViewById<ImageButton>(R.id.removeExerciseBtn)
+
+                exerciseNameTv.text = exercise.name
+
+                // Tag the view with the exercise object so we can retrieve it later
+                exerciseConfigView.tag = exercise
+
+                removeBtn.setOnClickListener {
+                    selectedExercises.remove(exercise)
+                    exercisesContainer.removeView(exerciseConfigView)
+                }
+
+                // Add the new view to the container. This makes it appear in the UI.
+                exercisesContainer.addView(exerciseConfigView)
             }
         }
 
@@ -125,11 +137,26 @@ class MainActivity : BaseActivity() {
                 return@setOnClickListener
             }
 
+            val configuredExercises = mutableListOf<Exercise>()
+            for (i in 0 until exercisesContainer.childCount) {
+                val view = exercisesContainer.getChildAt(i)
+                val exercise = view.tag as Exercise
+
+                val setsEtx = view.findViewById<EditText>(R.id.defaultSetsEtx)
+                val repsEtx = view.findViewById<EditText>(R.id.defaultRepsEtx)
+
+                val sets = setsEtx.text.toString().toIntOrNull() ?: 3 // Default to 3 if empty/invalid
+                val reps = repsEtx.text.toString().toIntOrNull() ?: 10 // Default to 10 if empty/invalid
+
+                // Create a copy of the exercise with the new default values
+                configuredExercises.add(exercise.copy(defaultSets = sets, defaultReps = reps))
+            }
+
             val newWorkout = Workout(
                 id = Workout.generateId(),
                 name = name,
                 description = description,
-                exercises = selectedExercises,
+                exercises = configuredExercises, // Use the list with user-defined sets/reps
                 isFavorite = false
             )
 
@@ -139,10 +166,9 @@ class MainActivity : BaseActivity() {
             // 2. Add to local data manager for immediate UI update
             WorkoutDataManager.addWorkout(newWorkout)
 
-            // 3. Notify adapter
+            // 3. Notify adapter to show the new item
             workoutAdapter.notifyItemInserted(0)
             findViewById<RecyclerView>(R.id.recyclerView).scrollToPosition(0)
-
 
             dialog.dismiss()
             Toast.makeText(this, "Workout '$name' created!", Toast.LENGTH_SHORT).show()
@@ -324,6 +350,7 @@ class MainActivity : BaseActivity() {
             Exercise(id = "ex_leg_press", name = "Leg Press", description = "...", targetMuscle = "Quadriceps, Glutes", defaultSets = 4, defaultReps = 15)
         )
     }
+
 
     private fun scrollToTop() {
         val scrollView = findViewById<ScrollView>(R.id.workoutSv)
