@@ -349,8 +349,8 @@ class MainActivity : BaseActivity() {
                 name = "Leg Day",
                 description = "Complete lower body workout",
                 exercises = listOf(
-                    Exercise(id = "ex_squats", name = "Squats", description = "...", targetMuscle = "Quadriceps, Glutes", defaultSets = 4, defaultReps = 12),
-                    Exercise(id = "ex_rdl", name = "Romanian Deadlift", description = "...", targetMuscle = "Hamstrings, Glutes", defaultSets = 3, defaultReps = 10)
+                    createMasterExerciseList().find { it.id == "barbell_back_squat" }!!.copy(defaultSets = 4, defaultReps = 8),
+                    createMasterExerciseList().find { it.id == "romanian_deadlift" }!!.copy(defaultSets = 3, defaultReps = 10)
                 ),
                 createdBy = "Gainly"
             ),
@@ -359,8 +359,8 @@ class MainActivity : BaseActivity() {
                 name = "Upper Body",
                 description = "Chest and back focus",
                 exercises = listOf(
-                    Exercise(id = "ex_bench", name = "Bench Press", description = "...", targetMuscle = "Chest, Triceps", defaultSets = 4, defaultReps = 8),
-                    Exercise(id = "ex_pullups", name = "Pull-ups", description = "...", targetMuscle = "Back, Biceps", defaultSets = 3, defaultReps = 6)
+                    createMasterExerciseList().find { it.id == "dumbbell_fly" }!!.copy(defaultSets = 3, defaultReps = 12),
+                    createMasterExerciseList().find { it.id == "deadlift" }!!.copy(defaultSets = 4, defaultReps = 5)
                 ),
                 createdBy = "Gainly"
             )
