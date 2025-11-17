@@ -33,14 +33,12 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_page)
 
-        // Initialize Firestore
         firestore = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
 
-        // Setup UI and load data
         setupRecyclerView()
         setupClickListeners()
-        fetchWorkoutsFromFirestore() // Fetch data from Firestore on start
+        fetchWorkoutsFromFirestore()
         scrollToTop()
     }
 
@@ -58,6 +56,14 @@ class MainActivity : BaseActivity() {
             onFavoriteToggle = { position, isFavorite ->
                 val workout = WorkoutDataManager.workouts[position]
                 toggleFavorite(workout, isFavorite)
+            },
+            onEditWorkout = { position ->  // Add edit callback
+                val workout = WorkoutDataManager.workouts[position]
+                showEditWorkoutDialog(workout, position)
+            },
+            onDeleteWorkout = { position ->  // Add delete callback
+                val workout = WorkoutDataManager.workouts[position]
+                deleteWorkout(workout, position)
             }
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -330,6 +336,183 @@ class MainActivity : BaseActivity() {
             val message = if (isFavorite) "Added to favorites" else "Removed from favorites"
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun showEditWorkoutDialog(workout: Workout, position: Int) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.new_workout_popup)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val closeBtn = dialog.findViewById<ImageButton>(R.id.closeBtn)
+        val createWorkoutBtn = dialog.findViewById<Button>(R.id.createWorkoutBtn)
+        val addExerciseBtn = dialog.findViewById<Button>(R.id.addExerciseBtn)
+        val workoutNameEditText = dialog.findViewById<EditText>(R.id.workoutNameEtx)
+        val descriptionEditText = dialog.findViewById<EditText>(R.id.descriptionEtx)
+        val titleTextView = dialog.findViewById<TextView>(R.id.newWorkoutTxv)
+        val exercisesContainer = dialog.findViewById<LinearLayout>(R.id.exercisesContainer)
+
+        // Change title to "Edit Workout"
+        titleTextView.text = "Edit Workout"
+
+        // Pre-fill the fields with existing workout data
+        workoutNameEditText.setText(workout.name)
+        descriptionEditText.setText(workout.description)
+
+        val selectedExercises = workout.exercises.toMutableList()
+
+        // Clear and re-populate exercises container
+        exercisesContainer.removeAllViews()
+        workout.exercises.forEach { exercise ->
+            val exerciseConfigView = LayoutInflater.from(this)
+                .inflate(R.layout.pre_config_exercise_item, exercisesContainer, false)
+
+            val exerciseNameTv = exerciseConfigView.findViewById<TextView>(R.id.exerciseNameTv)
+            val setsEtx = exerciseConfigView.findViewById<EditText>(R.id.defaultSetsEtx)
+            val repsEtx = exerciseConfigView.findViewById<EditText>(R.id.defaultRepsEtx)
+            val removeBtn = exerciseConfigView.findViewById<ImageButton>(R.id.removeExerciseBtn)
+
+            exerciseNameTv.text = exercise.name
+            setsEtx.setText(exercise.defaultSets.toString())
+            repsEtx.setText(exercise.defaultReps.toString())
+
+            // Tag the view with the exercise object
+            exerciseConfigView.tag = exercise
+
+            removeBtn.setOnClickListener {
+                selectedExercises.remove(exercise)
+                exercisesContainer.removeView(exerciseConfigView)
+            }
+
+            exercisesContainer.addView(exerciseConfigView)
+        }
+
+        addExerciseBtn.setOnClickListener {
+            showExerciseSelectionDialog { exercise ->
+                // Prevent adding the same exercise multiple times
+                if (selectedExercises.any { it.id == exercise.id }) {
+                    Toast.makeText(this, "${exercise.name} is already in the list.", Toast.LENGTH_SHORT).show()
+                    return@showExerciseSelectionDialog
+                }
+
+                selectedExercises.add(exercise)
+
+                // Inflate the pre_config_exercise_item layout
+                val exerciseConfigView = LayoutInflater.from(this)
+                    .inflate(R.layout.pre_config_exercise_item, exercisesContainer, false)
+
+                val exerciseNameTv = exerciseConfigView.findViewById<TextView>(R.id.exerciseNameTv)
+                val setsEtx = exerciseConfigView.findViewById<EditText>(R.id.defaultSetsEtx)
+                val repsEtx = exerciseConfigView.findViewById<EditText>(R.id.defaultRepsEtx)
+                val removeBtn = exerciseConfigView.findViewById<ImageButton>(R.id.removeExerciseBtn)
+
+                exerciseNameTv.text = exercise.name
+                setsEtx.setText(exercise.defaultSets.toString())
+                repsEtx.setText(exercise.defaultReps.toString())
+
+                // Tag the view with the exercise object
+                exerciseConfigView.tag = exercise
+
+                removeBtn.setOnClickListener {
+                    selectedExercises.remove(exercise)
+                    exercisesContainer.removeView(exerciseConfigView)
+                }
+
+                exercisesContainer.addView(exerciseConfigView)
+            }
+        }
+
+        createWorkoutBtn.text = "Update Workout"
+
+        createWorkoutBtn.setOnClickListener {
+            val name = workoutNameEditText.text.toString()
+            val description = descriptionEditText.text.toString()
+
+            if (name.isBlank()) {
+                workoutNameEditText.error = "Workout name cannot be empty."
+                return@setOnClickListener
+            }
+            if (selectedExercises.isEmpty()) {
+                Toast.makeText(this, "Please add at least one exercise.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val configuredExercises = mutableListOf<Exercise>()
+            for (i in 0 until exercisesContainer.childCount) {
+                val view = exercisesContainer.getChildAt(i)
+                val exercise = view.tag as Exercise
+
+                val setsEtx = view.findViewById<EditText>(R.id.defaultSetsEtx)
+                val repsEtx = view.findViewById<EditText>(R.id.defaultRepsEtx)
+
+                val sets = setsEtx.text.toString().toIntOrNull() ?: 3
+                val reps = repsEtx.text.toString().toIntOrNull() ?: 10
+
+                configuredExercises.add(exercise.copy(defaultSets = sets, defaultReps = reps))
+            }
+
+            val currentUser = auth.currentUser
+            val userEmail = currentUser?.email ?: "unknown"
+
+            val updatedWorkout = Workout(
+                id = workout.id, // Keep the same ID
+                name = name,
+                description = description,
+                exercises = configuredExercises,
+                isFavorite = workout.isFavorite, // Keep the same favorite status
+                createdBy = userEmail
+            )
+
+            // 1. Update in Firebase
+            updateWorkoutInFirestore(updatedWorkout)
+
+            // 2. Update in local data manager
+            WorkoutDataManager.workouts[position] = updatedWorkout
+
+            // 3. Notify adapter
+            workoutAdapter.notifyItemChanged(position)
+
+            dialog.dismiss()
+            Toast.makeText(this, "Workout '$name' updated!", Toast.LENGTH_SHORT).show()
+        }
+
+        closeBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun updateWorkoutInFirestore(workout: Workout) {
+        firestore.collection("user-saved-workouts").document(workout.id)
+            .set(workout)
+            .addOnSuccessListener {
+                Log.d("Firestore", "Workout ${workout.id} successfully updated!")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error updating workout: ${e.message}")
+                Toast.makeText(this, "Failed to update workout in cloud.", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun deleteWorkout(workout: Workout, position: Int) {
+        // 1. Delete from Firebase
+        firestore.collection("user-saved-workouts").document(workout.id)
+            .delete()
+            .addOnSuccessListener {
+                Log.d("Firestore", "Workout ${workout.id} successfully deleted!")
+
+                // 2. Delete from local data manager
+                WorkoutDataManager.workouts.removeAt(position)
+
+                // 3. Notify adapter
+                workoutAdapter.notifyItemRemoved(position)
+
+                Toast.makeText(this, "Workout '${workout.name}' deleted!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error deleting workout: ${e.message}")
+                Toast.makeText(this, "Failed to delete workout from cloud.", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun loadSampleData() {

@@ -1,18 +1,22 @@
 package com.itismob.s17.gainly
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 
 class WorkoutAdapter(
     private var workouts: List<Workout> = ArrayList(),
     private val onExerciseClick: (Exercise) -> Unit = {},
-    private val onStartWorkout: (Int) -> Unit = {}, // Now takes position instead of Workout
-    private val onFavoriteToggle: (Int, Boolean) -> Unit =  { _, _ -> } // Now takes position instead of Workout } // Now takes position instead of Workout
+    private val onStartWorkout: (Int) -> Unit = {},
+    private val onFavoriteToggle: (Int, Boolean) -> Unit =  { _, _ -> },
+    private val onEditWorkout: (Int) -> Unit = { _ -> },
+    private val onDeleteWorkout: (Int) -> Unit = { _ -> }
 ) : RecyclerView.Adapter<WorkoutViewHolder>() {
 
     fun updateWorkouts(newWorkouts: List<Workout>) {
@@ -81,21 +85,36 @@ class WorkoutAdapter(
         val popup = PopupMenu(view.context, view)
         popup.menuInflater.inflate(R.menu.workout_option, popup.menu)
 
+        if (workout.createdBy == "Gainly") {
+            popup.menu.findItem(R.id.delete).isVisible = false
+        }
+
         // popup menu logic for edit and delete not needed yet
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.edit -> {
-                    // Can use position to edit: onEditWorkout(position)
+                    onEditWorkout(position)
                     true
                 }
                 R.id.delete -> {
-                    // Can use position to delete: onDeleteWorkout(position)
+                    deleteConfirmation(view.context, position)
                     true
                 }
                 else -> false
             }
         }
         popup.show()
+    }
+
+    private fun deleteConfirmation(context: Context, position: Int) {
+        AlertDialog.Builder(context)
+            .setTitle("Delete Workout")
+            .setMessage("Are you sure you want to delete this workout?")
+            .setPositiveButton("Delete") { dialog, which ->
+                onDeleteWorkout(position)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     override fun getItemCount(): Int = workouts.size
