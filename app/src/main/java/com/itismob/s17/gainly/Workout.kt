@@ -1,8 +1,7 @@
 package com.itismob.s17.gainly
 
-import java.io.Serializable
-
 data class Workout(
+    val id: String = "", // For Firebase/SQLite
     val name: String,
     val description: String,
     val exercises: List<Exercise>,
