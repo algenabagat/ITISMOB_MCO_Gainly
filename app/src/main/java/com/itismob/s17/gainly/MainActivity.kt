@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import android.widget.ImageView
 
 class MainActivity : BaseActivity() {
 
@@ -216,7 +217,7 @@ class MainActivity : BaseActivity() {
         recyclerView.adapter = allExercisesAdapter
 
         // Setup Spinner
-        val muscleGroups = listOf("All") + allExercises.map { it.targetMuscle }.distinct().sorted()
+        val muscleGroups = listOf("All") + allExercises.map { it.category }.distinct().sorted()
         val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, muscleGroups)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = spinnerAdapter
@@ -295,6 +296,7 @@ class MainActivity : BaseActivity() {
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         val exerciseNameTv = dialog.findViewById<TextView>(R.id.workoutTv)
+        val exerciseImageIv = dialog.findViewById<ImageView>(R.id.exerciseImageIv) // Make sure this ID exists in your layout
         val exerciseDescriptionTv = dialog.findViewById<TextView>(R.id.exerciseDescriptionTv)
         val targetMuscleTv = dialog.findViewById<TextView>(R.id.targetMuscleTv)
         val closeBtn = dialog.findViewById<ImageButton>(R.id.closeBtn)
@@ -302,6 +304,8 @@ class MainActivity : BaseActivity() {
         exerciseNameTv?.text = exercise.name
         exerciseDescriptionTv?.text = exercise.description
         targetMuscleTv?.text = exercise.targetMuscle
+
+        exerciseImageIv?.setImageResource(exercise.imageResId)
 
         closeBtn?.setOnClickListener {
             dialog.dismiss()
@@ -364,16 +368,328 @@ class MainActivity : BaseActivity() {
     }
 
     private fun createMasterExerciseList(): List<Exercise> {
-        // In a real app, this would be a comprehensive list fetched from Firestore
         return listOf(
-            Exercise(id = "ex_squats", name = "Squats", description = "...", targetMuscle = "Quadriceps, Glutes", defaultSets = 4, defaultReps = 12),
-            Exercise(id = "ex_rdl", name = "Romanian Deadlift", description = "...", targetMuscle = "Hamstrings, Glutes", defaultSets = 3, defaultReps = 10),
-            Exercise(id = "ex_bench", name = "Bench Press", description = "...", targetMuscle = "Chest, Triceps", defaultSets = 4, defaultReps = 8),
-            Exercise(id = "ex_pullups", name = "Pull-ups", description = "...", targetMuscle = "Back, Biceps", defaultSets = 3, defaultReps = 6),
-            Exercise(id = "ex_overhead_press", name = "Overhead Press", description = "...", targetMuscle = "Shoulders, Triceps", defaultSets = 4, defaultReps = 8),
-            Exercise(id = "ex_barbell_row", name = "Barbell Row", description = "...", targetMuscle = "Back, Biceps", defaultSets = 4, defaultReps = 8),
-            Exercise(id = "ex_lat_pulldown", name = "Lat Pulldown", description = "...", targetMuscle = "Back", defaultSets = 3, defaultReps = 12),
-            Exercise(id = "ex_leg_press", name = "Leg Press", description = "...", targetMuscle = "Quadriceps, Glutes", defaultSets = 4, defaultReps = 15)
+            // CHEST EXERCISES
+            Exercise(
+                id = "barbell_bench_press",
+                name = "Barbell Bench Press",
+                description = "The cornerstone of chest development. Lying on a flat bench, you lower a barbell to your mid-chest and press it back up.\n\nHow-to: Lie on a flat bench with feet firmly on the floor. Grip the bar slightly wider than shoulder-width. Lower the bar to your mid-chest with control, keeping your elbows at a 45-75 degree angle from your body. Press the bar back up to the starting position.",
+                targetMuscle = "Chest, Triceps, Shoulders",
+                category = "Chest",
+                defaultSets = 4,
+                defaultReps = 8,
+                imageResId = R.drawable.barbell_bench_press
+            ),
+            Exercise(
+                id = "incline_dumbbell_press",
+                name = "Incline Dumbbell Press",
+                description = "Targets the upper pectorals, helping to build a full, balanced chest.\n\nHow-to: Set a bench to a 30-45 degree incline. Sit back with a dumbbell in each hand at your chest. Press the dumbbells up until your arms are extended but not locked. Lower them back down with control.",
+                targetMuscle = "Upper Chest, Shoulders",
+                category = "Chest",
+                defaultSets = 4,
+                defaultReps = 10,
+                imageResId = R.drawable.incline_dumbell_press
+            ),
+            Exercise(
+                id = "dumbbell_fly",
+                name = "Dumbbell Fly",
+                description = "An isolation movement that focuses on the stretch and contraction of the chest muscles.\n\nHow-to: Lie on a flat or incline bench, holding dumbbells above your chest with a slight bend in your elbows. With a controlled motion, lower the dumbbells out to your sides in a wide arc until you feel a deep stretch in your chest. Squeeze your chest to bring the dumbbells back to the starting position.",
+                targetMuscle = "Chest",
+                category = "Chest",
+                defaultSets = 3,
+                defaultReps = 12,
+                imageResId = R.drawable.dumbbell_fly
+            ),
+            Exercise(
+                id = "push_up",
+                name = "Push-Up",
+                description = "A fundamental bodyweight exercise that builds chest, shoulder, and tricep strength.\n\nHow-to: Start in a high plank position with hands slightly wider than shoulders. Keep your body in a straight line from head to heels. Lower your body until your chest nearly touches the floor, then push back up to the start.",
+                targetMuscle = "Chest, Shoulders, Triceps",
+                category = "Chest",
+                defaultSets = 3,
+                defaultReps = 15,
+                imageResId = R.drawable.push_up
+            ),
+            Exercise(
+                id = "cable_crossover",
+                name = "Cable Crossover",
+                description = "Provides constant tension on the chest, excellent for building muscle definition and a peak contraction.\n\nHow-to: Set two cable pulleys to a high position. Grab a handle in each hand and step forward, leaning slightly. With a slight bend in your elbows, pull the cables down and across your body in a wide arc, squeezing your chest hard at the bottom.",
+                targetMuscle = "Chest",
+                category = "Chest",
+                defaultSets = 3,
+                defaultReps = 12,
+                imageResId = R.drawable.cable_crossover
+            ),
+
+            // BACK EXERCISES
+            Exercise(
+                id = "deadlift",
+                name = "Deadlift",
+                description = "A foundational compound lift that builds total-body strength and a powerful back.\n\nHow-to: Stand with feet hip-width, a barbell over your mid-foot. Hinge at your hips and bend knees to grip the bar. Keep your back straight, chest up, and drive through your heels to stand up tall, pulling the bar along your shins. Reverse the movement with control.",
+                targetMuscle = "Back, Hamstrings, Glutes",
+                category = "Back",
+                defaultSets = 4,
+                defaultReps = 5,
+                imageResId = R.drawable.deadlift
+            ),
+            Exercise(
+                id = "pull_up",
+                name = "Pull-Up",
+                description = "The ultimate exercise for building wide lats.\n\nHow-to: Grab a bar with an overhand grip, wider than your shoulders. Hang with arms extended. Pull your chest towards the bar by driving your elbows down, squeezing your back. Lower yourself with control.",
+                targetMuscle = "Back, Biceps",
+                category = "Back",
+                defaultSets = 3,
+                defaultReps = 8,
+                imageResId = R.drawable.pull_up
+            ),
+            Exercise(
+                id = "bent_over_barbell_row",
+                name = "Bent-Over Barbell Row",
+                description = "A mass-builder for the entire back, focusing on the mid-back and lats.\n\nHow-to: Stand with feet shoulder-width, holding a barbell. Hinge at your hips until your torso is nearly parallel to the floor, knees slightly bent. Pull the bar towards your lower chest/upper stomach, squeezing your back. Lower the bar with control.",
+                targetMuscle = "Back, Biceps",
+                category = "Back",
+                defaultSets = 4,
+                defaultReps = 8,
+                imageResId = R.drawable.bent_over_barbell_row
+            ),
+            Exercise(
+                id = "seated_cable_row",
+                name = "Seated Cable Row",
+                description = "Excellent for building thickness in the mid-back and rhomboids.\n\nHow-to: Sit at a cable row machine with feet braced. Grab the handle (V-grip is common). With a straight back, pull the handle towards your stomach, driving your elbows back and squeezing your shoulder blades. Extend your arms to feel a stretch in your back.",
+                targetMuscle = "Back, Biceps",
+                category = "Back",
+                defaultSets = 3,
+                defaultReps = 10,
+                imageResId = R.drawable.seated_cable_row
+            ),
+            Exercise(
+                id = "face_pull",
+                name = "Face Pull",
+                description = "A crucial exercise for shoulder health and building rear delts/upper back.\n\nHow-to: Set a cable pulley at chest height with a rope attachment. Grab the ropes and step back. Pull the ropes directly towards your face, splitting the rope apart so your hands end up by your ears. Squeeze your rear delts and upper back.",
+                targetMuscle = "Rear Delts, Upper Back",
+                category = "Back",
+                defaultSets = 3,
+                defaultReps = 15,
+                imageResId = R.drawable.face_pull
+            ),
+
+            // SHOULDER EXERCISES
+            Exercise(
+                id = "overhead_press",
+                name = "Overhead Press",
+                description = "The primary compound movement for building strong, rounded shoulders.\n\nHow-to: Stand or sit with a barbell at your upper chest or dumbbells at your shoulders. Press the weight directly overhead until your arms are fully extended. Keep your core tight. Lower the weight with control.",
+                targetMuscle = "Shoulders, Triceps",
+                category = "Shoulders",
+                defaultSets = 4,
+                defaultReps = 8,
+                imageResId = R.drawable.overhead_press
+            ),
+            Exercise(
+                id = "dumbbell_lateral_raise",
+                name = "Dumbbell Lateral Raise",
+                description = "Isolates the medial (side) delt, which is key for shoulder width.\n\nHow-to: Stand holding a dumbbell in each hand at your sides. With a slight bend in your elbows, raise the dumbbells out to your sides until they are at shoulder height. Lower them with control. Avoid using momentum.",
+                targetMuscle = "Shoulders",
+                category = "Shoulders",
+                defaultSets = 3,
+                defaultReps = 12,
+                imageResId = R.drawable.dumbbell_lateral_raise
+            ),
+            Exercise(
+                id = "dumbbell_front_raise",
+                name = "Dumbbell Front Raise",
+                description = "Targets the anterior (front) delt.\n\nHow-to: Stand holding a dumbbell in each hand in front of your thighs. Keeping your arms straight, raise one dumbbell directly in front of you to shoulder height. Lower it with control and alternate arms.",
+                targetMuscle = "Front Shoulders",
+                category = "Shoulders",
+                defaultSets = 3,
+                defaultReps = 12,
+                imageResId = R.drawable.dumbbell_front_raise
+            ),
+            Exercise(
+                id = "bent_over_dumbbell_reverse_fly",
+                name = "Bent-Over Dumbbell Reverse Fly",
+                description = "Targets the posterior (rear) delt, crucial for balanced shoulder development and posture.\n\nHow-to: Hinge at your hips until your torso is nearly parallel to the floor, holding light dumbbells. With a slight bend in your elbows, raise the dumbbells out to your sides, squeezing your rear delts. Lower with control.",
+                targetMuscle = "Rear Shoulders",
+                category = "Shoulders",
+                defaultSets = 3,
+                defaultReps = 12,
+                imageResId = R.drawable.bent_over_dumbbell_reverse_fly
+            ),
+            Exercise(
+                id = "cable_upright_row",
+                name = "Cable Upright Row",
+                description = "Works the side delts and traps. Use a controlled motion to be shoulder-friendly.\n\nHow-to: Stand facing a cable machine with a straight bar attachment set low. Grip the bar with hands close together. Pull the bar straight up along your body, leading with your elbows, until the bar reaches chest level. Lower with control.",
+                targetMuscle = "Rear Shoulders",
+                category = "Shoulders",
+                defaultSets = 3,
+                defaultReps = 10,
+                imageResId = R.drawable.cable_upright_row
+            ),
+
+            // LEG EXERCISES
+            Exercise(
+                id = "barbell_back_squat",
+                name = "Barbell Back Squat",
+                description = "The king of lower-body exercises. Builds overall leg strength and size.\n\nHow-to: Rest a barbell across your upper back. Stand with feet shoulder-width apart. Keeping your chest up and back straight, lower your hips as if sitting in a chair until your thighs are at least parallel to the floor. Drive through your heels to return to the start.",
+                targetMuscle = "Quadriceps, Glutes, Hamstrings",
+                category = "Legs",
+                defaultSets = 4,
+                defaultReps = 8,
+                imageResId = R.drawable.barbell_back_squat
+            ),
+            Exercise(
+                id = "romanian_deadlift",
+                name = "Romanian Deadlift",
+                description = "Unlocks the hamstrings and glutes through a hip-hinging movement.\n\nHow-to: Hold a barbell or dumbbells in front of your thighs. With a slight bend in your knees, hinge at your hips, pushing them back. Keep your back straight as you lower the weight down your shins until you feel a deep stretch in your hamstrings. Squeeze your glutes to return to the start.",
+                targetMuscle = "Hamstrings, Glutes",
+                category = "Legs",
+                defaultSets = 3,
+                defaultReps = 10,
+                imageResId = R.drawable.romanian_deadlift
+            ),
+            Exercise(
+                id = "bulgarian_split_squat",
+                name = "Bulgarian Split Squat",
+                description = "A single-leg exercise that builds incredible leg strength and stability.\n\nHow-to: Stand a few feet in front of a bench. Rest the top of one foot on the bench behind you. Lower your body down until your front thigh is parallel to the floor, keeping your knee behind your toe. Drive through your front foot to return to the start.",
+                targetMuscle = "Quadriceps, Glutes",
+                category = "Legs",
+                defaultSets = 3,
+                defaultReps = 10,
+                imageResId = R.drawable.bulgarian_split_squat
+            ),
+            Exercise(
+                id = "leg_press",
+                name = "Leg Press",
+                description = "A machine-based compound movement that allows you to safely load the quads and glutes with heavy weight.\n\nHow-to: Sit in the machine and place your feet shoulder-width on the platform. Lower the safety bars and press the platform away until your legs are extended (do not lock knees). Lower the weight with control until your knees are at a 90-degree angle.",
+                targetMuscle = "Quadriceps, Glutes",
+                category = "Legs",
+                defaultSets = 4,
+                defaultReps = 12,
+                imageResId = R.drawable.leg_press
+            ),
+            Exercise(
+                id = "lying_leg_curl",
+                name = "Lying Leg Curl",
+                description = "Isolates the hamstrings.\n\nHow-to: Lie face down on the machine, with the pad resting on the back of your ankles. Curl your heels towards your glutes, squeezing your hamstrings. Lower the weight with control.",
+                targetMuscle = "Hamstrings",
+                category = "Legs",
+                defaultSets = 3,
+                defaultReps = 12,
+                imageResId = R.drawable.lying_leg_curl
+            ),
+            Exercise(
+                id = "walking_lunges",
+                name = "Walking Lunges",
+                description = "A dynamic leg exercise that improves coordination and unilateral strength.\n\nHow-to: Stand holding dumbbells at your sides. Take a large step forward and lower your back knee until it almost touches the floor. Both knees should be at 90-degree angles. Push off your back foot to bring it forward into the next lunge.",
+                targetMuscle = "Quadriceps, Glutes",
+                category = "Legs",
+                defaultSets = 3,
+                defaultReps = 10,
+                imageResId = R.drawable.walking_lunges
+            ),
+
+            // ARM EXERCISES
+            Exercise(
+                id = "barbell_bicep_curl",
+                name = "Barbell Bicep Curl",
+                description = "A classic mass-builder for the biceps.\n\nHow-to: Stand holding a barbell with an underhand grip, hands shoulder-width. Keeping your elbows pinned to your sides, curl the bar up towards your shoulders. Squeeze your biceps at the top, then lower with control.",
+                targetMuscle = "Biceps",
+                category = "Arms",
+                defaultSets = 3,
+                defaultReps = 10,
+                imageResId = R.drawable.barbell_bicep_curl
+            ),
+            Exercise(
+                id = "skull_crusher",
+                name = "Skull Crusher",
+                description = "A highly effective isolation movement for the triceps.\n\nHow-to: Lie on a flat bench holding an EZ-bar or dumbbells above your chest. Hinge at the elbows to lower the weight towards the top of your head. Keep your upper arms stationary. Extend your elbows to press the weight back to the start.",
+                targetMuscle = "Triceps",
+                category = "Arms",
+                defaultSets = 3,
+                defaultReps = 10,
+                imageResId = R.drawable.skull_crusher
+            ),
+            Exercise(
+                id = "hammer_curl",
+                name = "Hammer Curl",
+                description = "Targets the biceps brachialis and brachioradialis, adding thickness to the upper arm.\n\nHow-to: Hold dumbbells at your sides with a neutral (palms-facing) grip. Curl the dumbbells up, keeping your palms facing each other. Squeeze at the top and lower with control.",
+                targetMuscle = "Biceps, Forearms",
+                category = "Arms",
+                defaultSets = 3,
+                defaultReps = 12,
+                imageResId = R.drawable.hammer_curl
+            ),
+            Exercise(
+                id = "tricep_pushdown",
+                name = "Tricep Pushdown",
+                description = "The go-to exercise for tricep definition and the horseshoe shape.\n\nHow-to: Stand facing a high-pulley cable machine with a rope or bar attachment. Grip the attachment and push it down until your elbows are fully extended, squeezing your triceps. Control the weight back up.",
+                targetMuscle = "Triceps",
+                category = "Arms",
+                defaultSets = 3,
+                defaultReps = 12,
+                imageResId = R.drawable.tricep_pushdown
+            ),
+            Exercise(
+                id = "close_grip_bench_press",
+                name = "Close-Grip Bench Press",
+                description = "A compound tricep movement that allows you to move significant weight.\n\nHow-to: Perform a bench press with your hands placed shoulder-width apart or closer. This places more emphasis on the triceps.",
+                targetMuscle = "Triceps, Chest",
+                category = "Arms",
+                defaultSets = 4,
+                defaultReps = 8,
+                imageResId = R.drawable.close_grip_bench_press
+            ),
+
+            // CORE EXERCISES
+            Exercise(
+                id = "plank",
+                name = "Plank",
+                description = "A fundamental isometric exercise for core stability.\n\nHow-to: Lie on your stomach and prop yourself up on your forearms and toes. Keep your body in a straight line from head to heels, engaging your core and glutes. Do not let your hips sag.",
+                targetMuscle = "Core, Abs",
+                category = "Core",
+                defaultSets = 3,
+                defaultReps = 1, // Hold for time instead of reps
+                imageResId = R.drawable.plank
+            ),
+            Exercise(
+                id = "hanging_leg_raise",
+                name = "Hanging Leg Raise",
+                description = "An advanced movement that targets the entire abdominal wall, especially the lower abs.\n\nHow-to: Hang from a pull-up bar with a firm grip. Keeping your legs relatively straight, use your lower abs to raise your legs until they are parallel to the floor. Lower them with control.",
+                targetMuscle = "Abs, Core",
+                category = "Core",
+                defaultSets = 3,
+                defaultReps = 12,
+                imageResId = R.drawable.hanging_leg_raise
+            ),
+            Exercise(
+                id = "russian_twist",
+                name = "Russian Twist",
+                description = "Targets the obliques and rotational core strength.\n\nHow-to: Sit on the floor with knees bent, lean back to engage your core. Hold a weight or medicine ball with both hands. Rotate your torso to one side, tap the weight on the floor, then rotate to the other side.",
+                targetMuscle = "Obliques, Core",
+                category = "Core",
+                defaultSets = 3,
+                defaultReps = 15,
+                imageResId = R.drawable.russian_twist
+            ),
+            Exercise(
+                id = "cable_crunch",
+                name = "Cable Crunch",
+                description = "Effectively loads the rectus abdominis (the 'six-pack' muscle) for growth.\n\nHow-to: Kneel below a high-pulley cable with a rope attachment. Grab the ropes and position them by your head. Flex your spine, bringing your elbows down towards your knees. Squeeze your abs hard and return with control.",
+                targetMuscle = "Abs",
+                category = "Core",
+                defaultSets = 3,
+                defaultReps = 15,
+                imageResId = R.drawable.cable_crunch
+            ),
+            Exercise(
+                id = "dead_bug",
+                name = "Dead Bug",
+                description = "An excellent exercise for core stability and preventing lower back arching.\n\nHow-to: Lie on your back with arms extended towards the ceiling and legs raised with knees bent at 90 degrees. Slowly lower your right arm and left leg towards the floor simultaneously, without letting your back arch. Return to the start and alternate sides.",
+                targetMuscle = "Core, Abs",
+                category = "Core",
+                defaultSets = 3,
+                defaultReps = 10,
+                imageResId = R.drawable.dead_bug
+            )
         )
     }
 

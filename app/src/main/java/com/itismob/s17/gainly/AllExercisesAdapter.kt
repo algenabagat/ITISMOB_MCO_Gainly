@@ -57,7 +57,7 @@ class AllExercisesAdapter(
         filteredExercises = if (muscleGroup == "All") {
             allExercises
         } else {
-            allExercises.filter { it.targetMuscle.contains(muscleGroup, ignoreCase = true) }
+            allExercises.filter { it.category.contains(muscleGroup, ignoreCase = true) }
         }
         notifyDataSetChanged()
     }
