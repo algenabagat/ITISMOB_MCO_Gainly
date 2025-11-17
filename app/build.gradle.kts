@@ -68,4 +68,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation("com.google.android.material:material:1.13.0")
     implementation("com.facebook.android:facebook-android-sdk:latest.release")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
