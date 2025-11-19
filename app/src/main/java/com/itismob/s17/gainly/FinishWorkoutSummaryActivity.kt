@@ -158,16 +158,16 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
 
         when {
             completionRate == 1.0 -> {
-                desc3Txv.text = "Perfect workout! You completed all sets! 💪"
+                desc3Txv.text = "Perfect workout! You completed all sets!"
             }
             completionRate >= 0.8 -> {
-                desc3Txv.text = "Great job! You're making excellent progress! 🔥"
+                desc3Txv.text = "Great job! You're making excellent progress!"
             }
             completionRate >= 0.5 -> {
-                desc3Txv.text = "Good work! Keep pushing forward! 💯"
+                desc3Txv.text = "Good work! Keep pushing forward!"
             }
             else -> {
-                desc3Txv.text = "Every workout counts! Keep it up! 👍"
+                desc3Txv.text = "Every workout counts! Keep it up!"
             }
         }
     }
