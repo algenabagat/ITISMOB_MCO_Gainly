@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/history_card_background">
+
+    <TextView
+        android:id="@+id/exerciseName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Exercise Name"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/exerciseStats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="3 sets • 30 reps • 100 kg"
+        android:textColor="@color/gray"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp" />
+
+    <LinearLayout
+        android:id="@+id/setsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>

@@ -135,16 +135,19 @@ class WorkoutTrackingActivity : AppCompatActivity() {
         val repsEditText = setView.findViewById<EditText>(R.id.repsEditText)
         val completedCheckbox = setView.findViewById<CheckBox>(R.id.completedCheckbox)
 
-        // Get the specific exercise and set record from the current session state
+        // Get the CURRENT set record from the session (not a copy)
         val exerciseSession = currentSession.exerciseSessions[exerciseIndex]
         val setRecord = exerciseSession.sets[setIndex]
 
         setNumberTv.text = "${setRecord.setNumber}."
         previousWeightTv.text = "${exerciseSession.targetWeight.toInt()} lbs"
 
+        // Set initial values from the ACTUAL set record
         weightEditText.setText(if (setRecord.weight > 0) setRecord.weight.toInt().toString() else "")
-        repsEditText.setText(setRecord.reps.toString())
+        repsEditText.setText(if (setRecord.reps > 0) setRecord.reps.toString() else exerciseSession.targetReps.toString())
         completedCheckbox.isChecked = setRecord.completed
+
+        println("DEBUG: Initializing set ${setRecord.setNumber} - completed: ${setRecord.completed}")
 
         // --- Event Listeners to update the session state ---
         val updateSetRecord: () -> Unit = {
@@ -152,13 +155,20 @@ class WorkoutTrackingActivity : AppCompatActivity() {
             val reps = repsEditText.text.toString().toIntOrNull() ?: 0
             val isChecked = completedCheckbox.isChecked
 
-            // Create a new updated set record
-            val updatedSet = setRecord.copy(weight = weight, reps = reps, completed = isChecked)
+            println("DEBUG: Updating set ${setRecord.setNumber} - completed: $isChecked")
 
-            // Update the list of sets in the exercise session
-            val updatedSets = exerciseSession.sets.toMutableList()
-            updatedSets[setIndex] = updatedSet
-            currentSession.exerciseSessions[exerciseIndex] = exerciseSession.copy(sets = updatedSets)
+            // CRITICAL FIX: Directly update the set record in the current session
+            // Since sets is a MutableList, we can update it directly
+            currentSession.exerciseSessions[exerciseIndex].sets[setIndex].apply {
+                this.weight = weight
+                this.reps = reps
+                this.completed = isChecked
+            }
+
+            // Verify the update
+            val updatedSet = currentSession.exerciseSessions[exerciseIndex].sets[setIndex]
+            println("DEBUG: Set ${updatedSet.setNumber} verified - completed: ${updatedSet.completed}")
+
             checkWorkoutCompletionState()
         }
 
@@ -174,13 +184,26 @@ class WorkoutTrackingActivity : AppCompatActivity() {
             // Auto-fill values when checkbox is checked
             if (isChecked) {
                 if (weightEditText.text.isNullOrEmpty()) {
-                    weightEditText.setText(exerciseSession.targetWeight.toInt().toString())
+                    val defaultWeight = if (setRecord.weight > 0) setRecord.weight else exerciseSession.targetWeight
+                    weightEditText.setText(defaultWeight.toInt().toString())
                 }
                 if (repsEditText.text.isNullOrEmpty() || repsEditText.text.toString() == "0") {
-                    repsEditText.setText(exerciseSession.targetReps.toString())
+                    val defaultReps = if (setRecord.reps > 0) setRecord.reps else exerciseSession.targetReps
+                    repsEditText.setText(defaultReps.toString())
                 }
             }
             updateSetRecord()
+        }
+
+        // Also update when user manually types values
+        weightEditText.setOnKeyListener { _, _, _ ->
+            updateSetRecord()
+            false
+        }
+
+        repsEditText.setOnKeyListener { _, _, _ ->
+            updateSetRecord()
+            false
         }
 
         setsContainer.addView(setView)

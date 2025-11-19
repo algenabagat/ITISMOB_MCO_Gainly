@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_marginTop="16dp"
+    android:background="@drawable/history_card_background">
+
+    <TextView
+        android:id="@+id/totalTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total Time: 45m 30s"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/totalSets"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total Sets: 12"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:id="@+id/totalReps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total Reps: 120"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:layout_marginTop="2dp" />
+
+    <TextView
+        android:id="@+id/totalWeight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total Weight: 1200 kg"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:layout_marginTop="2dp" />
+
+    <TextView
+        android:id="@+id/completedDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Completed: Jan 01, 2024 at 14:30"
+        android:textColor="@color/gray"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>
