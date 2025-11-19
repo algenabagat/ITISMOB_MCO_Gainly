@@ -99,6 +99,17 @@
 
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/noWorkoutsHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No workouts available! Choose to create a new workout or import workouts from the community!"
+            android:textColor="@color/gray"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:padding="32dp"
+            android:visibility="gone" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"

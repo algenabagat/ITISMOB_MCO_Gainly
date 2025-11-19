@@ -13,11 +13,15 @@ import androidx.recyclerview.widget.RecyclerView
 class WorkoutAdapter(
     private var workouts: List<Workout> = ArrayList(),
     private val onExerciseClick: (Exercise) -> Unit = {},
-    private val onStartWorkout: (Int) -> Unit = {},
-    private val onFavoriteToggle: (Int, Boolean) -> Unit =  { _, _ -> },
-    private val onEditWorkout: (Int) -> Unit = { _ -> },
-    private val onDeleteWorkout: (Int) -> Unit = { _ -> }
+    private val onStartWorkout: (Workout) -> Unit = {},
+    private val onFavoriteToggle: (Workout, Boolean) -> Unit =  { _, _ -> },
+    private val onEditWorkout: (Workout) -> Unit = { _ -> },
+    private val onDeleteWorkout: (Workout) -> Unit = { _ -> }
 ) : RecyclerView.Adapter<WorkoutViewHolder>() {
+
+    override fun getItemId(position: Int): Long {
+        return workouts[position].id.hashCode().toLong()
+    }
 
     fun updateWorkouts(newWorkouts: List<Workout>) {
         workouts = newWorkouts
@@ -33,6 +37,10 @@ class WorkoutAdapter(
     override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int) {
         val workout = workouts[position]
 
+        if (position < 0 || position >= workouts.size) {
+            return
+        }
+
         // workout info
         holder.workoutNameTv.text = workout.name
         holder.workoutDescriptionTv.text = workout.description
@@ -43,7 +51,7 @@ class WorkoutAdapter(
         // Pass position to favorite toggle
         holder.favoriteBtn.setOnClickListener {
             val newFavoriteState = !workout.isFavorite
-            onFavoriteToggle(position, newFavoriteState) // Pass position instead of workout
+            onFavoriteToggle(workout, newFavoriteState) // Pass position instead of workout
             updateFavoriteButtonIcon(holder.favoriteBtn, newFavoriteState)
         }
 
@@ -65,11 +73,11 @@ class WorkoutAdapter(
 
         // Pass position to start workout
         holder.startBtn.setOnClickListener {
-            onStartWorkout(position) // Pass position instead of workout
+            onStartWorkout(workout) // Pass position instead of workout
         }
 
         holder.optionsBtn.setOnClickListener { view ->
-            showOptionsMenu(view, workout, holder, position)
+            showOptionsMenu(view, workout, holder)
         }
     }
 
@@ -81,23 +89,19 @@ class WorkoutAdapter(
         }
     }
 
-    private fun showOptionsMenu(view: View, workout: Workout, holder: WorkoutViewHolder, position: Int) {
+    private fun showOptionsMenu(view: View, workout: Workout, holder: WorkoutViewHolder) {
         val popup = PopupMenu(view.context, view)
         popup.menuInflater.inflate(R.menu.workout_option, popup.menu)
-
-        if (workout.createdBy == "Gainly") {
-            popup.menu.findItem(R.id.delete).isVisible = false
-        }
 
         // popup menu logic for edit and delete not needed yet
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.edit -> {
-                    onEditWorkout(position)
+                    onEditWorkout(workout)
                     true
                 }
                 R.id.delete -> {
-                    deleteConfirmation(view.context, position)
+                    deleteConfirmation(view.context, workout)
                     true
                 }
                 else -> false
@@ -106,12 +110,12 @@ class WorkoutAdapter(
         popup.show()
     }
 
-    private fun deleteConfirmation(context: Context, position: Int) {
+    private fun deleteConfirmation(context: Context, workout: Workout) {
         AlertDialog.Builder(context)
             .setTitle("Delete Workout")
             .setMessage("Are you sure you want to delete this workout?")
             .setPositiveButton("Delete") { dialog, which ->
-                onDeleteWorkout(position)
+                onDeleteWorkout(workout)
             }
             .setNegativeButton("Cancel", null)
             .show()

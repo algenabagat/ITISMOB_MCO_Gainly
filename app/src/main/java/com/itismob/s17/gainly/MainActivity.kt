@@ -1,7 +1,9 @@
 package com.itismob.s17.gainly
 
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,12 +17,13 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import android.widget.ImageView
+import org.json.JSONArray
+import org.json.JSONObject
 
 class MainActivity : BaseActivity() {
 
@@ -28,6 +31,14 @@ class MainActivity : BaseActivity() {
     private lateinit var firestore: FirebaseFirestore
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var noWorkoutsHint: TextView
+    private lateinit var recyclerView: RecyclerView
+
+    companion object {
+        private const val PREFS_NAME = "WorkoutPrefs"
+        private const val KEY_USER_WORKOUTS = "user_workouts"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,11 +46,16 @@ class MainActivity : BaseActivity() {
 
         firestore = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+
+        noWorkoutsHint = findViewById(R.id.noWorkoutsHint)
+        recyclerView = findViewById(R.id.recyclerView)
 
         setupRecyclerView()
         setupClickListeners()
-        fetchWorkoutsFromFirestore()
+        loadWorkoutsFromLocalStorage()
         scrollToTop()
+        updateNoWorkoutsHint()
     }
 
     private fun setupRecyclerView() {
@@ -49,25 +65,43 @@ class MainActivity : BaseActivity() {
             onExerciseClick = { exercise ->
                 showExerciseDetailDialog(exercise)
             },
-            onStartWorkout = { position ->
-                val workout = WorkoutDataManager.workouts[position]
+            onStartWorkout = { workout ->
+                // val workout = WorkoutDataManager.workouts[position]
                 startWorkout(workout)
             },
-            onFavoriteToggle = { position, isFavorite ->
-                val workout = WorkoutDataManager.workouts[position]
+            onFavoriteToggle = { workout, isFavorite ->
+                // val workout = WorkoutDataManager.workouts[position]
                 toggleFavorite(workout, isFavorite)
             },
-            onEditWorkout = { position ->  // Add edit callback
-                val workout = WorkoutDataManager.workouts[position]
-                showEditWorkoutDialog(workout, position)
+            onEditWorkout = { workout ->
+                // val workout = WorkoutDataManager.workouts[position]
+                // showEditWorkoutDialog(workout, position)
+                val position = WorkoutDataManager.workouts.indexOf(workout)
+                if (position != -1) {
+                    showEditWorkoutDialog(workout, position)
+                }
             },
-            onDeleteWorkout = { position ->  // Add delete callback
-                val workout = WorkoutDataManager.workouts[position]
-                deleteWorkout(workout, position)
+            onDeleteWorkout = { workout ->
+                // val workout = WorkoutDataManager.workouts[position]
+                // deleteWorkout(workout, position)
+                val position = WorkoutDataManager.workouts.indexOf(workout)
+                if (position != -1) {
+                    deleteWorkout(workout, position)
+                }
             }
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = workoutAdapter
+    }
+
+    private fun updateNoWorkoutsHint() {
+        if (WorkoutDataManager.workouts.isEmpty()) {
+            noWorkoutsHint.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+        } else {
+            noWorkoutsHint.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
+        }
     }
 
     private fun setupClickListeners() {
@@ -75,6 +109,97 @@ class MainActivity : BaseActivity() {
         newWorkoutBtn.setOnClickListener {
             showNewWorkoutDialog()
         }
+    }
+
+    private fun loadWorkoutsFromLocalStorage() {
+        val workoutsJson = sharedPreferences.getString(KEY_USER_WORKOUTS, null)
+
+        if (workoutsJson.isNullOrEmpty()) {
+            loadSampleWorkouts()
+        } else {
+            // Load from SharedPreferences
+            val savedWorkouts = parseWorkoutsFromJson(workoutsJson)
+            WorkoutDataManager.workouts.clear()
+            WorkoutDataManager.workouts.addAll(savedWorkouts)
+            workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)
+        }
+        updateNoWorkoutsHint()
+    }
+
+    private fun saveWorkoutsToLocalStorage() {
+        val workoutsJson = convertWorkoutsToJson(WorkoutDataManager.workouts)
+        sharedPreferences.edit().putString(KEY_USER_WORKOUTS, workoutsJson).apply()
+    }
+
+    private fun convertWorkoutsToJson(workouts: List<Workout>): String {
+        val jsonArray = JSONArray()
+        workouts.forEach { workout ->
+            val workoutJson = JSONObject().apply {
+                put("id", workout.id)
+                put("name", workout.name)
+                put("description", workout.description)
+                put("isFavorite", workout.isFavorite)
+                put("createdBy", workout.createdBy)
+
+                val exercisesArray = JSONArray()
+                workout.exercises.forEach { exercise ->
+                    val exerciseJson = JSONObject().apply {
+                        put("id", exercise.id)
+                        put("name", exercise.name)
+                        put("description", exercise.description)
+                        put("targetMuscle", exercise.targetMuscle)
+                        put("category", exercise.category)
+                        put("defaultSets", exercise.defaultSets)
+                        put("defaultReps", exercise.defaultReps)
+                        put("imageResId", exercise.imageResId)
+                    }
+                    exercisesArray.put(exerciseJson)
+                }
+                put("exercises", exercisesArray)
+            }
+            jsonArray.put(workoutJson)
+        }
+        return jsonArray.toString()
+    }
+
+    private fun parseWorkoutsFromJson(jsonString: String): List<Workout> {
+        val workouts = mutableListOf<Workout>()
+        try {
+            val jsonArray = JSONArray(jsonString)
+            for (i in 0 until jsonArray.length()) {
+                val workoutJson = jsonArray.getJSONObject(i)
+                val exercises = mutableListOf<Exercise>()
+
+                val exercisesArray = workoutJson.getJSONArray("exercises")
+                for (j in 0 until exercisesArray.length()) {
+                    val exerciseJson = exercisesArray.getJSONObject(j)
+                    val exercise = Exercise(
+                        id = exerciseJson.getString("id"),
+                        name = exerciseJson.getString("name"),
+                        description = exerciseJson.getString("description"),
+                        targetMuscle = exerciseJson.getString("targetMuscle"),
+                        category = exerciseJson.getString("category"),
+                        defaultSets = exerciseJson.getInt("defaultSets"),
+                        defaultReps = exerciseJson.getInt("defaultReps"),
+                        imageResId = exerciseJson.getInt("imageResId")
+                    )
+                    exercises.add(exercise)
+                }
+
+                val workout = Workout(
+                    id = workoutJson.getString("id"),
+                    name = workoutJson.getString("name"),
+                    description = workoutJson.getString("description"),
+                    exercises = exercises,
+                    isFavorite = workoutJson.getBoolean("isFavorite"),
+                    createdBy = workoutJson.getString("createdBy")
+                )
+                workouts.add(workout)
+            }
+        } catch (e: Exception) {
+            Log.e("LocalStorage", "Error parsing workouts from JSON: ${e.message}")
+        }
+        return workouts
     }
 
     private fun startWorkout(workout: Workout) {
@@ -175,18 +300,7 @@ class MainActivity : BaseActivity() {
                 createdBy = "$userEmail"
             )
 
-            // 1. Save to Firebase
-            saveWorkoutToFirestore(newWorkout)
-
-            // 2. Add to local data manager for immediate UI update
-            WorkoutDataManager.addWorkout(newWorkout)
-
-            // 3. Notify adapter to show the new item
-            workoutAdapter.notifyItemInserted(0)
-            findViewById<RecyclerView>(R.id.recyclerView).scrollToPosition(0)
-
-            dialog.dismiss()
-            Toast.makeText(this, "Workout '$name' created!", Toast.LENGTH_SHORT).show()
+            showUploadOptionDialog(newWorkout, dialog)
         }
 
         closeBtn.setOnClickListener {
@@ -194,6 +308,35 @@ class MainActivity : BaseActivity() {
         }
 
         dialog.show()
+    }
+
+    private fun showUploadOptionDialog(workout: Workout, parentDialog: Dialog) {
+        AlertDialog.Builder(this)
+            .setTitle("Upload to Cloud?")
+            .setMessage("Do you want to upload this workout to the cloud so you can access it from other devices?")
+            .setPositiveButton("Upload to Cloud") { dialog, which ->
+                // Save locally and upload to cloud
+                addWorkoutLocally(workout)
+                saveWorkoutToFirestore(workout)
+                parentDialog.dismiss()
+                Toast.makeText(this, "Workout '${workout.name}' created and uploaded!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Save Locally Only") { dialog, which ->
+                // Save only locally
+                addWorkoutLocally(workout)
+                parentDialog.dismiss()
+                Toast.makeText(this, "Workout '${workout.name}' saved locally!", Toast.LENGTH_SHORT).show()
+            }
+            .setNeutralButton("Cancel", null)
+            .show()
+    }
+
+    private fun addWorkoutLocally(workout: Workout) {
+        WorkoutDataManager.addWorkout(workout)
+        saveWorkoutsToLocalStorage()
+        workoutAdapter.notifyItemInserted(0)
+        updateNoWorkoutsHint()
+        findViewById<RecyclerView>(R.id.recyclerView).scrollToPosition(0)
     }
 
     private fun showExerciseSelectionDialog(onExerciseSelected: (Exercise) -> Unit) {
@@ -281,7 +424,7 @@ class MainActivity : BaseActivity() {
                 val allWorkouts = userWorkouts + gainlyWorkouts
 
                 if (allWorkouts.isEmpty()) {
-                    loadSampleData()
+                    loadSampleWorkouts()
                 } else {
                     WorkoutDataManager.workouts.clear()
                     WorkoutDataManager.workouts.addAll(allWorkouts)
@@ -292,7 +435,7 @@ class MainActivity : BaseActivity() {
             .addOnFailureListener { exception ->
                 Log.e("Firestore", "Error getting documents: ", exception)
                 Toast.makeText(this, "Failed to load workouts from cloud.", Toast.LENGTH_SHORT).show()
-                loadSampleData()
+                loadSampleWorkouts()
             }
     }
 
@@ -324,13 +467,7 @@ class MainActivity : BaseActivity() {
         if (position != -1) {
             val updatedWorkout = workout.copy(isFavorite = isFavorite)
             WorkoutDataManager.workouts[position] = updatedWorkout
-
-            // Also update this change in Firestore
-            firestore.collection("user-saved-workouts").document(workout.id)
-                .update("favorite", isFavorite)
-                .addOnFailureListener {
-                    // Optionally revert the change and notify user
-                }
+            saveWorkoutsToLocalStorage() // Save favorite status locally
 
             workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)
             val message = if (isFavorite) "Added to favorites" else "Removed from favorites"
@@ -351,8 +488,8 @@ class MainActivity : BaseActivity() {
         val titleTextView = dialog.findViewById<TextView>(R.id.newWorkoutTxv)
         val exercisesContainer = dialog.findViewById<LinearLayout>(R.id.exercisesContainer)
 
-        // Change title to "Edit Workout"
         titleTextView.text = "Edit Workout"
+        createWorkoutBtn.text = "Update Workout"
 
         // Pre-fill the fields with existing workout data
         workoutNameEditText.setText(workout.name)
@@ -421,8 +558,6 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        createWorkoutBtn.text = "Update Workout"
-
         createWorkoutBtn.setOnClickListener {
             val name = workoutNameEditText.text.toString()
             val description = descriptionEditText.text.toString()
@@ -462,17 +597,27 @@ class MainActivity : BaseActivity() {
                 createdBy = userEmail
             )
 
-            // 1. Update in Firebase
-            updateWorkoutInFirestore(updatedWorkout)
+            val isUserWorkout = workout.createdBy != "Gainly"
 
-            // 2. Update in local data manager
-            WorkoutDataManager.workouts[position] = updatedWorkout
-
-            // 3. Notify adapter
-            workoutAdapter.notifyItemChanged(position)
-
-            dialog.dismiss()
-            Toast.makeText(this, "Workout '$name' updated!", Toast.LENGTH_SHORT).show()
+            if (isUserWorkout) {
+                // Check if the workout exists in the cloud
+                checkIfExistsInCloud(workout.id) { existsInCloud ->
+                    if (existsInCloud) {
+                        // Show option dialog for workouts that exist in cloud
+                        showEditOptionDialog(updatedWorkout, position, dialog)
+                    } else {
+                        // Update only locally for user workouts not in cloud
+                        updateWorkoutLocally(updatedWorkout, position)
+                        dialog.dismiss()
+                        Toast.makeText(this, "Workout '$name' updated locally!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                // For Gainly workouts, just update locally
+                updateWorkoutLocally(updatedWorkout, position)
+                dialog.dismiss()
+                Toast.makeText(this, "Workout '$name' updated locally!", Toast.LENGTH_SHORT).show()
+            }
         }
 
         closeBtn.setOnClickListener {
@@ -480,6 +625,33 @@ class MainActivity : BaseActivity() {
         }
 
         dialog.show()
+    }
+
+    private fun showEditOptionDialog(workout: Workout, position: Int, parentDialog: Dialog) {
+        AlertDialog.Builder(this)
+            .setTitle("Update Workout")
+            .setMessage("Do you want to update this workout in the cloud as well?")
+            .setPositiveButton("Update Locally & Cloud") { dialog, which ->
+                // Update both locally and in cloud
+                updateWorkoutLocally(workout, position)
+                updateWorkoutInFirestore(workout)
+                parentDialog.dismiss()
+                Toast.makeText(this, "Workout '${workout.name}' updated everywhere!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Update Locally Only") { dialog, which ->
+                // Update only locally
+                updateWorkoutLocally(workout, position)
+                parentDialog.dismiss()
+                Toast.makeText(this, "Workout '${workout.name}' updated locally!", Toast.LENGTH_SHORT).show()
+            }
+            .setNeutralButton("Cancel", null)
+            .show()
+    }
+
+    private fun updateWorkoutLocally(workout: Workout, position: Int) {
+        WorkoutDataManager.workouts[position] = workout
+        saveWorkoutsToLocalStorage()
+        workoutAdapter.notifyItemChanged(position)
     }
 
     private fun updateWorkoutInFirestore(workout: Workout) {
@@ -495,40 +667,93 @@ class MainActivity : BaseActivity() {
     }
 
     private fun deleteWorkout(workout: Workout, position: Int) {
+        val isUserWorkout = workout.createdBy != "Gainly"
+        // Check if this workout exists in the database (user-created workout)
+        if (isUserWorkout) {
+            // Check if the workout exists in the cloud
+            checkIfExistsInCloud(workout.id) { existsInCloud ->
+                if (existsInCloud) {
+                    // Show option dialog for workouts that exist in cloud
+                    showDeleteOptionDialog(workout, position)
+                } else {
+                    // Delete only locally for user workouts not in cloud
+                    deleteWorkoutLocally(workout, position)
+                    Toast.makeText(this, "Workout '${workout.name}' deleted locally!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            // For Gainly workouts, just delete locally
+            deleteWorkoutLocally(workout, position)
+            Toast.makeText(this, "Workout '${workout.name}' deleted locally!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showDeleteOptionDialog(workout: Workout, position: Int) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Workout")
+            .setMessage("Do you want to delete this workout from the cloud as well?")
+            .setPositiveButton("Delete Everywhere") { dialog, which ->
+                // Delete from both local and cloud
+                deleteWorkoutFromFirestore(workout, position)
+            }
+            .setNegativeButton("Delete Locally Only") { dialog, which ->
+                // Delete only locally
+                deleteWorkoutLocally(workout, position)
+                Toast.makeText(this, "Workout '${workout.name}' deleted locally!", Toast.LENGTH_SHORT).show()
+            }
+            .setNeutralButton("Cancel", null)
+            .show()
+    }
+
+    private fun deleteWorkoutLocally(workout: Workout, position: Int) {
+        WorkoutDataManager.workouts.removeAt(position)
+        saveWorkoutsToLocalStorage()
+        workoutAdapter.notifyItemRemoved(position)
+        updateNoWorkoutsHint()
+    }
+
+    private fun deleteWorkoutFromFirestore(workout: Workout, position: Int) {
         // 1. Delete from Firebase
         firestore.collection("user-saved-workouts").document(workout.id)
             .delete()
             .addOnSuccessListener {
-                Log.d("Firestore", "Workout ${workout.id} successfully deleted!")
+                Log.d("Firestore", "Workout ${workout.id} successfully deleted from cloud!")
 
                 // 2. Delete from local data manager
-                WorkoutDataManager.workouts.removeAt(position)
+                deleteWorkoutLocally(workout, position)
 
-                // 3. Notify adapter
-                workoutAdapter.notifyItemRemoved(position)
-
-                Toast.makeText(this, "Workout '${workout.name}' deleted!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Workout '${workout.name}' deleted everywhere!", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
-                Log.e("Firestore", "Error deleting workout: ${e.message}")
+                Log.e("Firestore", "Error deleting workout from cloud: ${e.message}")
                 Toast.makeText(this, "Failed to delete workout from cloud.", Toast.LENGTH_SHORT).show()
             }
     }
 
-    private fun loadSampleData() {
+    private fun checkIfExistsInCloud(workoutId: String, onComplete: (Boolean) -> Unit) {
+        firestore.collection("user-saved-workouts").document(workoutId)
+            .get()
+            .addOnSuccessListener { document ->
+                onComplete(document.exists())
+            }
+            .addOnFailureListener {
+                onComplete(false)
+            }
+    }
+
+    private fun loadSampleWorkouts() {
         if (WorkoutDataManager.workouts.isEmpty()) {
             val sampleWorkouts = createSampleWorkouts()
             WorkoutDataManager.workouts.addAll(sampleWorkouts)
-            // Save sample workouts to Firestore so they persist
-            sampleWorkouts.forEach { saveWorkoutToFirestore(it) }
+            saveWorkoutsToLocalStorage()
+            workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)
         }
-        workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)
     }
 
     private fun createSampleWorkouts(): List<Workout> {
         return listOf(
             Workout(
-                id = "sample_leg_day",
+                id = "leg_day",
                 name = "Leg Day",
                 description = "Complete lower body workout",
                 exercises = listOf(
@@ -538,7 +763,7 @@ class MainActivity : BaseActivity() {
                 createdBy = "Gainly"
             ),
             Workout(
-                id = "sample_upper_body",
+                id = "upper_body",
                 name = "Upper Body",
                 description = "Chest and back focus",
                 exercises = listOf(
