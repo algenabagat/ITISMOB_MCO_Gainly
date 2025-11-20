@@ -13,6 +13,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <!-- Header Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -38,53 +39,7 @@
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/history_card_background"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            tools:ignore="ExtraText">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/streakTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Streak"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/streakValue"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="0"
-                    android:textColor="#000000"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/streakSub"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="days this week"
-                    android:textColor="#666666"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-        </LinearLayout>
-
+        <!-- Stats Cards -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="120dp"
@@ -218,6 +173,7 @@
 
         </LinearLayout>
 
+        <!-- Recent Workouts Section -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -227,13 +183,16 @@
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
 
+        <!-- No History Layout -->
         <LinearLayout
+            android:id="@+id/noHistoryLayout"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:background="@drawable/history_card_background"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="40dp">
+            android:padding="40dp"
+            android:visibility="visible">
 
             <TextView
                 android:layout_width="match_parent"
@@ -255,6 +214,14 @@
                 android:textAlignment="center" />
 
         </LinearLayout>
+
+        <!-- Recent Workouts Container -->
+        <LinearLayout
+            android:id="@+id/recentWorkoutsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>
