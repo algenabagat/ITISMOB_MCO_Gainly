@@ -7,11 +7,14 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.compose.foundation.layout.add
+import androidx.compose.ui.semantics.text
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.io.path.Path
@@ -23,7 +26,7 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
         PlanStorageManager.loadPlans(this)
     }
     private lateinit var notificationHelper: NotificationHelper
-
+    private var selectedWorkoutForPlan: Workout? = null
     private var dateButtonToUpdate: Button? = null
     private var timeButtonToUpdate: Button? = null
     private val NOTIFICATION_PERMISSION_CODE = 101
@@ -36,11 +39,13 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
         requestNotificationPermission()
         setupRecyclerView()
         setupClickListeners()
+        planList.sortBy { it.year * 10000 + (it.month + 1) * 100 + it.day }
         planAdapter.updatePlans(planList)
     }
 
     private fun addPlan(plan: Plan) {
         planList.add(plan)
+        planList.sortBy { it.year * 10000 + (it.month + 1) * 100 + it.day }
         PlanStorageManager.savePlans(this, planList)
         notificationHelper.scheduleNotification(plan)
         planAdapter.updatePlans(planList)
@@ -68,6 +73,12 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
             plans = planList,
             onStartPlan = { plan ->
                 startPlan(plan)
+            },
+            onEditPlan = { plan ->
+                editPlan(plan)
+            },
+            onDeletePlan = { plan ->
+                deletePlan(plan)
             }
         )
 
@@ -89,11 +100,11 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
     }
 
     override fun onTimeSelected(hour: Int, minute: Int) {
-        val selectedTime = "$hour:$minute"
+        val selectedTime = String.format("%02d:%02d", hour, minute)
         timeButtonToUpdate?.text = selectedTime
     }
 
-    private fun showCreatePlanDialog() {
+    private fun showCreatePlanDialog(planToEdit: Plan? = null) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.new_plan_popup)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
@@ -102,13 +113,19 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
         val createPlanBtn = dialog.findViewById<Button>(R.id.createPlanBtn)
         val pickTime = dialog.findViewById<Button>(R.id.pickTimeBtn)
         val pickDateBtn = dialog.findViewById<Button>(R.id.pickDateBtn)
-
-        val selectedWorkout: Workout? = WorkoutDataManager.workouts.firstOrNull()
+        val pickWorkoutBtn = dialog.findViewById<Button>(R.id.addWorkoutBtn)
 
         dateButtonToUpdate = pickDateBtn
         timeButtonToUpdate = pickTime
 
-        // ... (other listeners like pickDateBtn, pickTime, closeBtn remain the same)
+        if (planToEdit != null) {
+            selectedWorkoutForPlan = planToEdit.workout
+            pickWorkoutBtn.text = planToEdit.workout.name
+            pickDateBtn.text = "${planToEdit.month + 1}/${planToEdit.day}/${planToEdit.year}"
+            pickTime.text = String.format("%02d:%02d", planToEdit.hour, planToEdit.minute)
+        } else {
+            selectedWorkoutForPlan = null
+        }
 
         pickDateBtn.setOnClickListener {
             DatePickerFragment().show(supportFragmentManager, "datePicker")
@@ -118,28 +135,33 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
             TimePickerFragment().show(supportFragmentManager, "timePicker")
         }
 
+        pickWorkoutBtn.setOnClickListener {
+            showWorkoutSelectionDialog { workout ->
+                selectedWorkoutForPlan = workout
+                pickWorkoutBtn.text = workout.name
+            }
+        }
+
         closeBtn.setOnClickListener {
             dialog.dismiss()
         }
 
         createPlanBtn.setOnClickListener {
-            // Basic validation
+            val currentSelectedWorkout = selectedWorkoutForPlan
             if (dateButtonToUpdate?.text.isNullOrEmpty() || timeButtonToUpdate?.text.isNullOrEmpty()) {
                 Toast.makeText(this, "Please select a date and time.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            if (selectedWorkout == null) {
-                Toast.makeText(this, "No available workouts to schedule.", Toast.LENGTH_SHORT).show()
+            if (currentSelectedWorkout == null) {
+                Toast.makeText(this, "Please select a workout to schedule.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // You'll need to parse the date and time back from the buttons' text
-            // This is a simplified example. A more robust solution would store these values directly.
             val dateParts = dateButtonToUpdate?.text.toString().split("/")
             val timeParts = timeButtonToUpdate?.text.toString().split(":")
 
             val year = dateParts[2].toInt()
-            val month = dateParts[0].toInt() - 1 // month is 0-indexed
+            val month = dateParts[0].toInt() - 1
             val day = dateParts[1].toInt()
             val hour = timeParts[0].toInt()
             val minute = timeParts[1].toInt()
@@ -150,7 +172,7 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
                 day = day,
                 hour = hour,
                 minute = minute,
-                workout = selectedWorkout
+                workout = currentSelectedWorkout
             )
 
             addPlan(newPlan)
@@ -166,125 +188,51 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
         dialog.show()
     }
 
+    private fun showWorkoutSelectionDialog(onWorkoutSelected: (Workout) -> Unit) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_select_workout)
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        val recyclerView = dialog.findViewById<RecyclerView>(R.id.workoutsRecyclerView)
+
+        val workouts = WorkoutDataManager.workouts
+
+        if (workouts.isEmpty()) {
+            Toast.makeText(this, "No workouts found. Create a workout first.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val adapter = WorkoutSelectionAdapter(workouts) { selectedWorkout ->
+            onWorkoutSelected(selectedWorkout)
+            dialog.dismiss()
+        }
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+
+        dialog.show()
+    }
+
     private fun startPlan(plan: Plan) {
-        // Find the position of the plan's workout within the global list in WorkoutDataManager.
         val workoutPosition = WorkoutDataManager.workouts.indexOfFirst { it.id == plan.workout.id }
 
-        // Check if the workout was actually found in the master list.
         if (workoutPosition != -1) {
             val intent = Intent(this, WorkoutTrackingActivity::class.java)
-            // Pass the integer position with the key that WorkoutTrackingActivity expects.
             intent.putExtra("workout_position", workoutPosition)
             startActivity(intent)
         } else {
-            // If the workout from the plan doesn't exist in the manager, show an error.
             Toast.makeText(this, "Could not find workout to start.", Toast.LENGTH_SHORT).show()
         }
     }
 
-
-    /*private fun addSamplePlans() {
-        val plan1 = Plan(
-            year = 2025,
-            month = 11, // December
-            day = 25,
-            hour = 21,
-            minute = 0,
-            workout =
-                Workout(
-                    id = "sample_leg_day",
-                    name = "Leg Day",
-                    description = "Complete lower body workout",
-                    exercises = listOf(
-                        Exercise(
-                            id = "ex_squats",
-                            name = "Squats",
-                            description = "...",
-                            targetMuscle = "Quadriceps, Glutes",
-                            defaultSets = 4,
-                            defaultReps = 12
-                        ),
-                        Exercise(
-                            id = "ex_rdl",
-                            name = "Romanian Deadlift",
-                            description = "...",
-                            targetMuscle = "Hamstrings, Glutes",
-                            defaultSets = 3,
-                            defaultReps = 10
-                        )
-                    ),
-                    createdBy = "Gainly"
-                )
-        )
-        addPlan(plan1)
-
-        val plan2 = Plan(
-            year = 2025,
-            month = 11, // December
-            day = 27,
-            hour = 15,
-            minute = 0,
-            workout =
-                Workout(
-                    id = "sample_upper_body",
-                    name = "Upper Body",
-                    description = "Chest and back focus",
-                    exercises = listOf(
-                        Exercise(
-                            id = "ex_bench",
-                            name = "Bench Press",
-                            description = "...",
-                            targetMuscle = "Chest, Triceps",
-                            defaultSets = 4,
-                            defaultReps = 8
-                        ),
-                        Exercise(
-                            id = "ex_pullups",
-                            name = "Pull-ups",
-                            description = "...",
-                            targetMuscle = "Back, Biceps",
-                            defaultSets = 3,
-                            defaultReps = 6
-                        )
-                    ),
-                    createdBy = "Gainly"
-                )
-        )
-        addPlan(plan2)
-
-        val plan3 = Plan(
-            year = 2025,
-            month = 10, // November (current month)
-            day = 16, // Assuming today's date
-            hour = 16,
-            minute = 20,
-            workout =
-                Workout(
-                    id = "sample_leg_day",
-                    name = "Leg Day",
-                    description = "Complete lower body workout",
-                    exercises = listOf(
-                        Exercise(
-                            id = "ex_squats",
-                            name = "Squats",
-                            description = "...",
-                            targetMuscle = "Quadriceps, Glutes",
-                            defaultSets = 4,
-                            defaultReps = 12
-                        ),
-                        Exercise(
-                            id = "ex_rdl",
-                            name = "Romanian Deadlift",
-                            description = "...",
-                            targetMuscle = "Hamstrings, Glutes",
-                            defaultSets = 3,
-                            defaultReps = 10
-                        )
-                    ),
-                    createdBy = "Gainly"
-                )
-        )
-        addPlan(plan3)
+    private fun editPlan(plan: Plan) {
+        deletePlan (plan)
+        showCreatePlanDialog(planToEdit = plan)
     }
-     */
+
+    private fun deletePlan(plan: Plan) {
+        planList.remove(plan)
+        PlanStorageManager.savePlans(this, planList)
+        planAdapter.updatePlans(planList)
+        Toast.makeText(this, "Plan for '${plan.workout.name}' deleted.", Toast.LENGTH_SHORT).show()    }
 }

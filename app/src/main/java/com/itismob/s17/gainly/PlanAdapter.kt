@@ -13,10 +13,8 @@ class PlanAdapter(
     private var plans: List<Plan> = ArrayList(),
     private val onWorkoutClick: (Workout) -> Unit = {},
     private val onStartPlan: (Plan) -> Unit = {},
-
-    // not needed yet:
-    // private val onEditPlan: (Plan) -> Unit = {},
-    // private val onDeletePlan: (Plan) -> Unit = {}
+    private val onEditPlan: (Plan) -> Unit = {},
+    private val onDeletePlan: (Plan) -> Unit = {}
 ) : RecyclerView.Adapter<PlanViewHolder>() {
 
     fun updatePlans(newPlans: List<Plan>) {
@@ -59,11 +57,11 @@ class PlanAdapter(
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.editPlan -> {
-                    // onEditWorkout(workout)
+                    onEditPlan(plan)
                     true
                 }
                 R.id.deletePlan -> {
-                    // onDeleteWorkout(workout)
+                    onDeletePlan(plan)
                     true
                 }
                 else -> false
