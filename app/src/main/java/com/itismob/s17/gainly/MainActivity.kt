@@ -106,10 +106,155 @@ class MainActivity : BaseActivity() {
 
     private fun setupClickListeners() {
         val newWorkoutBtn = findViewById<Button>(R.id.newWorkoutBtn)
+        val importBtn = findViewById<Button>(R.id.importBtn)
+
         newWorkoutBtn.setOnClickListener {
             showNewWorkoutDialog()
         }
+
+        importBtn.setOnClickListener { // Add this
+            showImportWorkoutDialog()
+        }
     }
+
+    private fun showImportWorkoutDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.import_workout_dialog)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.setCancelable(true)
+
+        val recyclerView = dialog.findViewById<RecyclerView>(R.id.workoutsRecyclerView)
+        val cancelButton = dialog.findViewById<Button>(R.id.cancelButton)
+        val importButton = dialog.findViewById<Button>(R.id.importButton)
+
+        // Fetch workouts from Firestore (excluding current user's workouts)
+        fetchPublicWorkouts { publicWorkouts ->
+            val adapter = ImportWorkoutAdapter(
+                workouts = publicWorkouts,
+                onWorkoutClick = { workout ->
+                    showWorkoutPreviewDialog(workout, dialog)
+                },
+                onWorkoutSelected = { _, hasSelection ->
+                    importButton.isEnabled = hasSelection
+                }
+            )
+
+            recyclerView.layoutManager = LinearLayoutManager(this)
+            recyclerView.adapter = adapter
+
+            cancelButton.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            importButton.setOnClickListener {
+                val selectedWorkouts = adapter.getSelectedWorkouts()
+                if (selectedWorkouts.isNotEmpty()) {
+                    importWorkouts(selectedWorkouts)
+                    dialog.dismiss()
+                    Toast.makeText(this, "Imported ${selectedWorkouts.size} workout(s)", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        dialog.show()
+    }
+    private fun fetchPublicWorkouts(onComplete: (List<Workout>) -> Unit) {
+        val currentUser = auth.currentUser
+        val currentUserEmail = currentUser?.email
+
+        firestore.collection("user-saved-workouts")
+            .get()
+            .addOnSuccessListener { result ->
+                val publicWorkouts = mutableListOf<Workout>()
+
+                for (document in result) {
+                    try {
+                        val workout = document.toObject(Workout::class.java)
+                        // Exclude current user's workouts and Gainly sample workouts
+                        if (workout.createdBy != currentUserEmail && workout.createdBy != "Gainly") {
+                            publicWorkouts.add(workout)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("ImportWorkout", "Error parsing workout: ${e.message}")
+                    }
+                }
+
+                onComplete(publicWorkouts)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("ImportWorkout", "Error fetching public workouts: ${exception.message}")
+                Toast.makeText(this, "Failed to load workouts", Toast.LENGTH_SHORT).show()
+                onComplete(emptyList())
+            }
+    }
+    private fun showWorkoutPreviewDialog(workout: Workout, parentDialog: Dialog? = null) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.import_workout_preview)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.setCancelable(true)
+
+        val workoutNameTextView = dialog.findViewById<TextView>(R.id.workoutNameTextView)
+        val createdByTextView = dialog.findViewById<TextView>(R.id.createdByTextView)
+        val descriptionTextView = dialog.findViewById<TextView>(R.id.descriptionTextView)
+        val exercisesContainer = dialog.findViewById<LinearLayout>(R.id.exercisesContainer)
+        val cancelButton = dialog.findViewById<Button>(R.id.cancelPreviewButton)
+        val importButton = dialog.findViewById<Button>(R.id.importPreviewButton)
+
+        // Set workout details
+        workoutNameTextView.text = workout.name
+        createdByTextView.text = "Created by: ${workout.createdBy}"
+        descriptionTextView.text = workout.description
+
+        // Clear and populate exercises
+        exercisesContainer.removeAllViews()
+        workout.exercises.forEach { exercise ->
+            val exerciseView = LayoutInflater.from(this)
+                .inflate(R.layout.simple_exercise_item, exercisesContainer, false)
+
+            val exerciseNameTextView = exerciseView.findViewById<TextView>(R.id.exerciseNameTextView)
+            val exerciseDetailsTextView = exerciseView.findViewById<TextView>(R.id.exerciseDetailsTextView)
+
+            exerciseNameTextView.text = exercise.name
+            exerciseDetailsTextView.text = "${exercise.defaultSets} sets × ${exercise.defaultReps} reps"
+
+            exercisesContainer.addView(exerciseView)
+        }
+
+        cancelButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        importButton.setOnClickListener {
+            importWorkouts(listOf(workout))
+            dialog.dismiss()
+            parentDialog?.dismiss() // Also close the main import dialog if it's open
+            Toast.makeText(this, "Imported '${workout.name}'", Toast.LENGTH_SHORT).show()
+        }
+
+        dialog.show()
+    }
+
+    private fun importWorkouts(workouts: List<Workout>) {
+        val currentUser = auth.currentUser
+        val currentUserEmail = currentUser?.email ?: "unknown"
+
+        workouts.forEach { workout ->
+            // Create a copy of the workout with updated createdBy field and new ID
+            val importedWorkout = Workout(
+                id = Workout.generateId(), // Generate new ID to avoid conflicts
+                name = workout.name,
+                description = workout.description,
+                exercises = workout.exercises.map { it.copy() }, // Copy exercises
+                isFavorite = false,
+                createdBy = currentUserEmail // Mark as created by current user
+            )
+
+            // Add to local storage
+            addWorkoutLocally(importedWorkout)
+        }
+    }
+
+
 
     private fun loadWorkoutsFromLocalStorage() {
         val workoutsJson = sharedPreferences.getString(KEY_USER_WORKOUTS, null)
