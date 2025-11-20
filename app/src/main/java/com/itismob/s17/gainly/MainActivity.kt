@@ -128,7 +128,7 @@ class MainActivity : BaseActivity() {
         val importButton = dialog.findViewById<Button>(R.id.importButton)
 
         // Fetch workouts from Firestore (excluding current user's workouts)
-        fetchPublicWorkouts { publicWorkouts ->
+        fetchUserWorkouts { publicWorkouts ->
             val adapter = ImportWorkoutAdapter(
                 workouts = publicWorkouts,
                 onWorkoutClick = { workout ->
@@ -158,28 +158,28 @@ class MainActivity : BaseActivity() {
 
         dialog.show()
     }
-    private fun fetchPublicWorkouts(onComplete: (List<Workout>) -> Unit) {
+    private fun fetchUserWorkouts(onComplete: (List<Workout>) -> Unit) {
         val currentUser = auth.currentUser
         val currentUserEmail = currentUser?.email
 
         firestore.collection("user-saved-workouts")
             .get()
             .addOnSuccessListener { result ->
-                val publicWorkouts = mutableListOf<Workout>()
+                val otherUserWorkouts = mutableListOf<Workout>()
 
                 for (document in result) {
                     try {
                         val workout = document.toObject(Workout::class.java)
                         // Exclude current user's workouts and Gainly sample workouts
                         if (workout.createdBy != currentUserEmail && workout.createdBy != "Gainly") {
-                            publicWorkouts.add(workout)
+                            otherUserWorkouts.add(workout)
                         }
                     } catch (e: Exception) {
                         Log.e("ImportWorkout", "Error parsing workout: ${e.message}")
                     }
                 }
 
-                onComplete(publicWorkouts)
+                onComplete(otherUserWorkouts)
             }
             .addOnFailureListener { exception ->
                 Log.e("ImportWorkout", "Error fetching public workouts: ${exception.message}")
