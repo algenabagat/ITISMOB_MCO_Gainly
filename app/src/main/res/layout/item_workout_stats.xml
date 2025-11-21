@@ -2,10 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/history_card_background"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:layout_marginTop="16dp"
-    android:background="@drawable/history_card_background">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/totalTime"
@@ -20,36 +21,36 @@
         android:id="@+id/totalSets"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="Total Sets: 12"
         android:textColor="@color/black"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/totalReps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
         android:text="Total Reps: 120"
         android:textColor="@color/black"
-        android:textSize="14sp"
-        android:layout_marginTop="2dp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/totalWeight"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
         android:text="Total Weight: 1200 kg"
         android:textColor="@color/black"
-        android:textSize="14sp"
-        android:layout_marginTop="2dp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/completedDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="Completed: Jan 01, 2024 at 14:30"
         android:textColor="@color/gray"
-        android:textSize="12sp"
-        android:layout_marginTop="8dp" />
+        android:textSize="12sp" />
 
 </LinearLayout>
