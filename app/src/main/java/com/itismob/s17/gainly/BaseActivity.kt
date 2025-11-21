@@ -31,7 +31,7 @@ open class BaseActivity : AppCompatActivity() {
             if (this !is PlanActivity) {
                 startActivity(Intent(this, PlanActivity::class.java))
                 overridePendingTransition(0, 0)
-                finish() // Close current activity
+                finish()
             }
         }
 
@@ -39,7 +39,7 @@ open class BaseActivity : AppCompatActivity() {
             if (this !is MainActivity) {
                 startActivity(Intent(this, MainActivity::class.java))
                 overridePendingTransition(0, 0)
-                finish() // Close current activity
+                finish()
             }
         }
 
@@ -47,7 +47,7 @@ open class BaseActivity : AppCompatActivity() {
             if (this !is HistoryActivity) {
                 startActivity(Intent(this, HistoryActivity::class.java))
                 overridePendingTransition(0, 0)
-                finish() // Close current activity
+                finish()
             }
         }
     }

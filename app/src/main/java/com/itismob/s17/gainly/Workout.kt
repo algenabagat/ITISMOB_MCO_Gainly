@@ -1,7 +1,7 @@
 package com.itismob.s17.gainly
 
 data class Workout(
-    val id: String = "", // For Firebase/SQLite
+    val id: String = "",
     val name: String,
     val description: String,
     val exercises: List<Exercise>,

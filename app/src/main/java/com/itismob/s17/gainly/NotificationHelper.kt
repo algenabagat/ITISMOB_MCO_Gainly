@@ -32,12 +32,12 @@ class NotificationHelper(private val context: Context) {
         val intent = Intent(context, NotificationReceiver::class.java).apply {
             putExtra("WORKOUT_NAME", plan.workout.name)
             putExtra("WORKOUT_DESC", "Your scheduled workout starts in an hour.")
-            putExtra("PLAN_ID", plan.hashCode()) // Use plan's hashcode for a unique ID
+            putExtra("PLAN_ID", plan.id.hashCode())
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            plan.hashCode(), // Use the same unique ID for the request code
+            plan.id.hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -52,6 +52,7 @@ class NotificationHelper(private val context: Context) {
             add(Calendar.HOUR_OF_DAY, -1)
         }
 
+        // Only schedule if it's in the future
         if (calendar.timeInMillis > System.currentTimeMillis()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
                 Toast.makeText(
@@ -67,5 +68,16 @@ class NotificationHelper(private val context: Context) {
                 pendingIntent
             )
         }
+    }
+
+    fun cancelNotification(plan: Plan) {
+        val intent = Intent(context, NotificationReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            plan.id.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
     }
 }

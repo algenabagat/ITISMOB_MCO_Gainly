@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 class AllExercisesAdapter(
     private var allExercises: List<Exercise>,
     private val onExerciseClick: (Exercise) -> Unit,
-    // Add a new callback for the info button
     private val onInfoClick: (Exercise) -> Unit
 ) : RecyclerView.Adapter<AllExercisesAdapter.ExerciseViewHolder>() {
 
@@ -27,12 +26,12 @@ class AllExercisesAdapter(
             nameTv.text = exercise.name
             muscleTv.text = exercise.targetMuscle
 
-            // Click listener for the main item (to select it)
+            // selecting an exercise
             textContainer.setOnClickListener {
                 onExerciseClick(exercise)
             }
 
-            // Click listener for the info button
+            // clicking the info
             infoBtn.setOnClickListener {
                 onInfoClick(exercise)
             }

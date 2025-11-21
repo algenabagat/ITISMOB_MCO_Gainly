@@ -123,8 +123,10 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
             pickWorkoutBtn.text = planToEdit.workout.name
             pickDateBtn.text = "${planToEdit.month + 1}/${planToEdit.day}/${planToEdit.year}"
             pickTime.text = String.format("%02d:%02d", planToEdit.hour, planToEdit.minute)
+            createPlanBtn.text = "Update Plan"
         } else {
             selectedWorkoutForPlan = null
+            createPlanBtn.text = "Create Plan"
         }
 
         pickDateBtn.setOnClickListener {
@@ -166,18 +168,45 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
             val hour = timeParts[0].toInt()
             val minute = timeParts[1].toInt()
 
-            val newPlan = Plan(
-                year = year,
-                month = month,
-                day = day,
-                hour = hour,
-                minute = minute,
-                workout = currentSelectedWorkout
-            )
+            val newPlan = if (planToEdit != null) {
+                planToEdit.copy(
+                    year = year,
+                    month = month,
+                    day = day,
+                    hour = hour,
+                    minute = minute,
+                    workout = currentSelectedWorkout
+                )
+            } else {
+                Plan(
+                    year = year,
+                    month = month,
+                    day = day,
+                    hour = hour,
+                    minute = minute,
+                    workout = currentSelectedWorkout
+                )
+            }
 
-            addPlan(newPlan)
+            if (planToEdit != null) {
+                val index = planList.indexOfFirst { it.id == planToEdit.id }
+                if (index != -1) {
+                    notificationHelper.cancelNotification(planToEdit)
+
+                    planList[index] = newPlan
+                    planList.sortBy { it.year * 10000 + (it.month + 1) * 100 + it.day }
+                    PlanStorageManager.savePlans(this, planList)
+
+                    notificationHelper.scheduleNotification(newPlan)
+
+                    planAdapter.updatePlans(planList)
+                    Toast.makeText(this, "Plan for '${newPlan.workout.name}' updated!", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                addPlan(newPlan)
+            }
+
             dialog.dismiss()
-            Toast.makeText(this, "Plan for '${newPlan.workout.name}' created!", Toast.LENGTH_SHORT).show()
         }
 
         dialog.setOnDismissListener {
@@ -226,13 +255,14 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
     }
 
     private fun editPlan(plan: Plan) {
-        deletePlan (plan)
         showCreatePlanDialog(planToEdit = plan)
     }
 
     private fun deletePlan(plan: Plan) {
-        planList.remove(plan)
+        planList.removeAll { it.id == plan.id }
         PlanStorageManager.savePlans(this, planList)
+        notificationHelper.cancelNotification(plan)
         planAdapter.updatePlans(planList)
-        Toast.makeText(this, "Plan for '${plan.workout.name}' deleted.", Toast.LENGTH_SHORT).show()    }
+        Toast.makeText(this, "Plan for '${plan.workout.name}' deleted.", Toast.LENGTH_SHORT).show()
+    }
 }

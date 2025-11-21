@@ -22,7 +22,6 @@ class WelcomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
         setupClickListeners()
@@ -103,7 +102,7 @@ class WelcomeActivity : AppCompatActivity() {
         }
     }
 
-    // Handle Facebook login result
+    // handle Facebook login result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         callbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)

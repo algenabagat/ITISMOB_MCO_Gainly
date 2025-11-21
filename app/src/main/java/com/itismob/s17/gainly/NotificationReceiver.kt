@@ -16,7 +16,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notification = NotificationCompat.Builder(context, "WORKOUT_REMINDERS")
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Replace with your app's icon
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("$workoutName is starting soon!")
             .setContentText(workoutDescription)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

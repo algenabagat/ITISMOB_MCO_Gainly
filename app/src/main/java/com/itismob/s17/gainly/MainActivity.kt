@@ -53,7 +53,7 @@ class MainActivity : BaseActivity() {
 
         setupRecyclerView()
         setupClickListeners()
-        loadWorkoutsFromLocalStorage()
+        loadWorkoutsLocal()
         scrollToTop()
         updateNoWorkoutsHint()
     }
@@ -66,24 +66,18 @@ class MainActivity : BaseActivity() {
                 showExerciseDetailDialog(exercise)
             },
             onStartWorkout = { workout ->
-                // val workout = WorkoutDataManager.workouts[position]
                 startWorkout(workout)
             },
             onFavoriteToggle = { workout, isFavorite ->
-                // val workout = WorkoutDataManager.workouts[position]
                 toggleFavorite(workout, isFavorite)
             },
             onEditWorkout = { workout ->
-                // val workout = WorkoutDataManager.workouts[position]
-                // showEditWorkoutDialog(workout, position)
                 val position = WorkoutDataManager.workouts.indexOf(workout)
                 if (position != -1) {
                     showEditWorkoutDialog(workout, position)
                 }
             },
             onDeleteWorkout = { workout ->
-                // val workout = WorkoutDataManager.workouts[position]
-                // deleteWorkout(workout, position)
                 val position = WorkoutDataManager.workouts.indexOf(workout)
                 if (position != -1) {
                     deleteWorkout(workout, position)
@@ -112,7 +106,8 @@ class MainActivity : BaseActivity() {
             showNewWorkoutDialog()
         }
 
-        importBtn.setOnClickListener { // Add this
+        // added feature: import
+        importBtn.setOnClickListener {
             showImportWorkoutDialog()
         }
     }
@@ -127,7 +122,7 @@ class MainActivity : BaseActivity() {
         val cancelButton = dialog.findViewById<Button>(R.id.cancelButton)
         val importButton = dialog.findViewById<Button>(R.id.importButton)
 
-        // Fetch workouts from Firestore (excluding current user's workouts)
+        // fetch from Firestore but excluding current user's
         fetchUserWorkouts { publicWorkouts ->
             val adapter = ImportWorkoutAdapter(
                 workouts = publicWorkouts,
@@ -170,7 +165,6 @@ class MainActivity : BaseActivity() {
                 for (document in result) {
                     try {
                         val workout = document.toObject(Workout::class.java)
-                        // Exclude current user's workouts and Gainly sample workouts
                         if (workout.createdBy != currentUserEmail && workout.createdBy != "Gainly") {
                             otherUserWorkouts.add(workout)
                         }
@@ -178,7 +172,6 @@ class MainActivity : BaseActivity() {
                         Log.e("ImportWorkout", "Error parsing workout: ${e.message}")
                     }
                 }
-
                 onComplete(otherUserWorkouts)
             }
             .addOnFailureListener { exception ->
@@ -200,12 +193,10 @@ class MainActivity : BaseActivity() {
         val cancelButton = dialog.findViewById<Button>(R.id.cancelPreviewButton)
         val importButton = dialog.findViewById<Button>(R.id.importPreviewButton)
 
-        // Set workout details
         workoutNameTextView.text = workout.name
         createdByTextView.text = "Created by: ${workout.createdBy}"
         descriptionTextView.text = workout.description
 
-        // Clear and populate exercises
         exercisesContainer.removeAllViews()
         workout.exercises.forEach { exercise ->
             val exerciseView = LayoutInflater.from(this)
@@ -227,7 +218,7 @@ class MainActivity : BaseActivity() {
         importButton.setOnClickListener {
             importWorkouts(listOf(workout))
             dialog.dismiss()
-            parentDialog?.dismiss() // Also close the main import dialog if it's open
+            parentDialog?.dismiss()
             Toast.makeText(this, "Imported '${workout.name}'", Toast.LENGTH_SHORT).show()
         }
 
@@ -238,31 +229,27 @@ class MainActivity : BaseActivity() {
         val currentUser = auth.currentUser
         val currentUserEmail = currentUser?.email ?: "unknown"
 
+        // creates a copy of the workout imported but with new IDs to avoid any conflict locally
         workouts.forEach { workout ->
-            // Create a copy of the workout with updated createdBy field and new ID
             val importedWorkout = Workout(
-                id = Workout.generateId(), // Generate new ID to avoid conflicts
+                id = Workout.generateId(),
                 name = workout.name,
                 description = workout.description,
-                exercises = workout.exercises.map { it.copy() }, // Copy exercises
+                exercises = workout.exercises.map { it.copy() },
                 isFavorite = false,
-                createdBy = currentUserEmail // Mark as created by current user
+                createdBy = currentUserEmail
             )
 
-            // Add to local storage
             addWorkoutLocally(importedWorkout)
         }
     }
 
-
-
-    private fun loadWorkoutsFromLocalStorage() {
+    private fun loadWorkoutsLocal() {
         val workoutsJson = sharedPreferences.getString(KEY_USER_WORKOUTS, null)
 
         if (workoutsJson.isNullOrEmpty()) {
             loadSampleWorkouts()
         } else {
-            // Load from SharedPreferences
             val savedWorkouts = parseWorkoutsFromJson(workoutsJson)
             WorkoutDataManager.workouts.clear()
             WorkoutDataManager.workouts.addAll(savedWorkouts)
@@ -271,7 +258,7 @@ class MainActivity : BaseActivity() {
         updateNoWorkoutsHint()
     }
 
-    private fun saveWorkoutsToLocalStorage() {
+    private fun saveWorkoutsLocal() {
         val workoutsJson = convertWorkoutsToJson(WorkoutDataManager.workouts)
         sharedPreferences.edit().putString(KEY_USER_WORKOUTS, workoutsJson).apply()
     }
@@ -375,7 +362,6 @@ class MainActivity : BaseActivity() {
 
         addExerciseBtn.setOnClickListener {
             showExerciseSelectionDialog { exercise ->
-                // Prevent adding the same exercise multiple times
                 if (selectedExercises.any { it.id == exercise.id }) {
                     Toast.makeText(this, "${exercise.name} is already in the list.", Toast.LENGTH_SHORT).show()
                     return@showExerciseSelectionDialog
@@ -383,7 +369,6 @@ class MainActivity : BaseActivity() {
 
                 selectedExercises.add(exercise)
 
-                // Inflate the pre_config_exercise_item layout
                 val exerciseConfigView = LayoutInflater.from(this)
                     .inflate(R.layout.pre_config_exercise_item, exercisesContainer, false)
 
@@ -392,7 +377,6 @@ class MainActivity : BaseActivity() {
 
                 exerciseNameTv.text = exercise.name
 
-                // Tag the view with the exercise object so we can retrieve it later
                 exerciseConfigView.tag = exercise
 
                 removeBtn.setOnClickListener {
@@ -400,7 +384,6 @@ class MainActivity : BaseActivity() {
                     exercisesContainer.removeView(exerciseConfigView)
                 }
 
-                // Add the new view to the container. This makes it appear in the UI.
                 exercisesContainer.addView(exerciseConfigView)
             }
         }
@@ -426,10 +409,10 @@ class MainActivity : BaseActivity() {
                 val setsEtx = view.findViewById<EditText>(R.id.defaultSetsEtx)
                 val repsEtx = view.findViewById<EditText>(R.id.defaultRepsEtx)
 
-                val sets = setsEtx.text.toString().toIntOrNull() ?: 3 // Default to 3 if empty/invalid
-                val reps = repsEtx.text.toString().toIntOrNull() ?: 10 // Default to 10 if empty/invalid
+                val sets = setsEtx.text.toString().toIntOrNull() ?: 3 // default value
+                val reps = repsEtx.text.toString().toIntOrNull() ?: 10 // same here
 
-                // Create a copy of the exercise with the new default values
+                // create a copy with default values
                 configuredExercises.add(exercise.copy(defaultSets = sets, defaultReps = reps))
             }
 
@@ -440,7 +423,7 @@ class MainActivity : BaseActivity() {
                 id = Workout.generateId(),
                 name = name,
                 description = description,
-                exercises = configuredExercises, // Use the list with user-defined sets/reps
+                exercises = configuredExercises,
                 isFavorite = false,
                 createdBy = "$userEmail"
             )
@@ -460,14 +443,12 @@ class MainActivity : BaseActivity() {
             .setTitle("Upload to Cloud?")
             .setMessage("Do you want to upload this workout to the cloud so you can access it from other devices?")
             .setPositiveButton("Upload to Cloud") { dialog, which ->
-                // Save locally and upload to cloud
                 addWorkoutLocally(workout)
-                saveWorkoutToFirestore(workout)
+                saveWorkoutFirestore(workout)
                 parentDialog.dismiss()
                 Toast.makeText(this, "Workout '${workout.name}' created and uploaded!", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Save Locally Only") { dialog, which ->
-                // Save only locally
                 addWorkoutLocally(workout)
                 parentDialog.dismiss()
                 Toast.makeText(this, "Workout '${workout.name}' saved locally!", Toast.LENGTH_SHORT).show()
@@ -478,7 +459,7 @@ class MainActivity : BaseActivity() {
 
     private fun addWorkoutLocally(workout: Workout) {
         WorkoutDataManager.addWorkout(workout)
-        saveWorkoutsToLocalStorage()
+        saveWorkoutsLocal()
         workoutAdapter.notifyItemInserted(0)
         updateNoWorkoutsHint()
         findViewById<RecyclerView>(R.id.recyclerView).scrollToPosition(0)
@@ -492,25 +473,21 @@ class MainActivity : BaseActivity() {
         val spinner = dialog.findViewById<android.widget.Spinner>(R.id.muscleGroupSpinner)
         val recyclerView = dialog.findViewById<RecyclerView>(R.id.allExercisesRecyclerView)
 
-        val allExercises = createMasterExerciseList()
+        val allExercises = createFullExerciseList()
 
-        // Setup Adapter for the RecyclerView
         val allExercisesAdapter = AllExercisesAdapter(
             allExercises = allExercises,
             onExerciseClick = { selectedExercise ->
-                // This part stays the same: selects the exercise
                 onExerciseSelected(selectedExercise)
                 dialog.dismiss()
             },
             onInfoClick = { exerciseToShow ->
-                // This is the new part: shows the detail dialog
                 showExerciseDetailDialog(exerciseToShow)
             }
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = allExercisesAdapter
 
-        // Setup Spinner
         val muscleGroups = listOf("All") + allExercises.map { it.category }.distinct().sorted()
         val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, muscleGroups)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -523,14 +500,14 @@ class MainActivity : BaseActivity() {
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                // Do nothing
+                // nothing at all bruh
             }
         }
 
         dialog.show()
     }
 
-    private fun saveWorkoutToFirestore(workout: Workout) {
+    private fun saveWorkoutFirestore(workout: Workout) {
         firestore.collection("user-saved-workouts").document(workout.id)
             .set(workout)
             .addOnSuccessListener {
@@ -544,53 +521,13 @@ class MainActivity : BaseActivity() {
             }
     }
 
-    private fun fetchWorkoutsFromFirestore() {
-        val currentUser = auth.currentUser
-        val userEmail = currentUser?.email
-
-        firestore.collection("user-saved-workouts")
-            .get()
-            .addOnSuccessListener { result ->
-                val userWorkouts = mutableListOf<Workout>()
-                val gainlyWorkouts = mutableListOf<Workout>()
-
-                for (document in result) {
-                    try {
-                        val workout = document.toObject(Workout::class.java)
-                        when (workout.createdBy) {
-                            userEmail -> userWorkouts.add(workout)
-                            "Gainly" -> gainlyWorkouts.add(workout)
-                        }
-                    } catch (e: Exception) {
-                        Log.e("Firestore", "Error parsing document ${document.id}: ${e.message}")
-                    }
-                }
-
-                val allWorkouts = userWorkouts + gainlyWorkouts
-
-                if (allWorkouts.isEmpty()) {
-                    loadSampleWorkouts()
-                } else {
-                    WorkoutDataManager.workouts.clear()
-                    WorkoutDataManager.workouts.addAll(allWorkouts)
-                    workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)
-                    Log.d("Firestore", "Loaded ${userWorkouts.size} user workouts + ${gainlyWorkouts.size} Gainly workouts")
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("Firestore", "Error getting documents: ", exception)
-                Toast.makeText(this, "Failed to load workouts from cloud.", Toast.LENGTH_SHORT).show()
-                loadSampleWorkouts()
-            }
-    }
-
     private fun showExerciseDetailDialog(exercise: Exercise) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.exercise_detail_dialog)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         val exerciseNameTv = dialog.findViewById<TextView>(R.id.workoutTv)
-        val exerciseImageIv = dialog.findViewById<ImageView>(R.id.exerciseImageIv) // Make sure this ID exists in your layout
+        val exerciseImageIv = dialog.findViewById<ImageView>(R.id.exerciseImageIv)
         val exerciseDescriptionTv = dialog.findViewById<TextView>(R.id.exerciseDescriptionTv)
         val targetMuscleTv = dialog.findViewById<TextView>(R.id.targetMuscleTv)
         val closeBtn = dialog.findViewById<ImageButton>(R.id.closeBtn)
@@ -612,7 +549,7 @@ class MainActivity : BaseActivity() {
         if (position != -1) {
             val updatedWorkout = workout.copy(isFavorite = isFavorite)
             WorkoutDataManager.workouts[position] = updatedWorkout
-            saveWorkoutsToLocalStorage() // Save favorite status locally
+            saveWorkoutsLocal()
 
             workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)
             val message = if (isFavorite) "Added to favorites" else "Removed from favorites"
@@ -636,13 +573,11 @@ class MainActivity : BaseActivity() {
         titleTextView.text = "Edit Workout"
         createWorkoutBtn.text = "Update Workout"
 
-        // Pre-fill the fields with existing workout data
         workoutNameEditText.setText(workout.name)
         descriptionEditText.setText(workout.description)
 
         val selectedExercises = workout.exercises.toMutableList()
 
-        // Clear and re-populate exercises container
         exercisesContainer.removeAllViews()
         workout.exercises.forEach { exercise ->
             val exerciseConfigView = LayoutInflater.from(this)
@@ -657,7 +592,6 @@ class MainActivity : BaseActivity() {
             setsEtx.setText(exercise.defaultSets.toString())
             repsEtx.setText(exercise.defaultReps.toString())
 
-            // Tag the view with the exercise object
             exerciseConfigView.tag = exercise
 
             removeBtn.setOnClickListener {
@@ -670,7 +604,6 @@ class MainActivity : BaseActivity() {
 
         addExerciseBtn.setOnClickListener {
             showExerciseSelectionDialog { exercise ->
-                // Prevent adding the same exercise multiple times
                 if (selectedExercises.any { it.id == exercise.id }) {
                     Toast.makeText(this, "${exercise.name} is already in the list.", Toast.LENGTH_SHORT).show()
                     return@showExerciseSelectionDialog
@@ -678,7 +611,6 @@ class MainActivity : BaseActivity() {
 
                 selectedExercises.add(exercise)
 
-                // Inflate the pre_config_exercise_item layout
                 val exerciseConfigView = LayoutInflater.from(this)
                     .inflate(R.layout.pre_config_exercise_item, exercisesContainer, false)
 
@@ -691,7 +623,6 @@ class MainActivity : BaseActivity() {
                 setsEtx.setText(exercise.defaultSets.toString())
                 repsEtx.setText(exercise.defaultReps.toString())
 
-                // Tag the view with the exercise object
                 exerciseConfigView.tag = exercise
 
                 removeBtn.setOnClickListener {
@@ -734,31 +665,27 @@ class MainActivity : BaseActivity() {
             val userEmail = currentUser?.email ?: "unknown"
 
             val updatedWorkout = Workout(
-                id = workout.id, // Keep the same ID
+                id = workout.id,
                 name = name,
                 description = description,
                 exercises = configuredExercises,
-                isFavorite = workout.isFavorite, // Keep the same favorite status
+                isFavorite = workout.isFavorite,
                 createdBy = userEmail
             )
 
             val isUserWorkout = workout.createdBy != "Gainly"
 
             if (isUserWorkout) {
-                // Check if the workout exists in the cloud
                 checkIfExistsInCloud(workout.id) { existsInCloud ->
                     if (existsInCloud) {
-                        // Show option dialog for workouts that exist in cloud
                         showEditOptionDialog(updatedWorkout, position, dialog)
                     } else {
-                        // Update only locally for user workouts not in cloud
                         updateWorkoutLocally(updatedWorkout, position)
                         dialog.dismiss()
                         Toast.makeText(this, "Workout '$name' updated locally!", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
-                // For Gainly workouts, just update locally
                 updateWorkoutLocally(updatedWorkout, position)
                 dialog.dismiss()
                 Toast.makeText(this, "Workout '$name' updated locally!", Toast.LENGTH_SHORT).show()
@@ -777,14 +704,12 @@ class MainActivity : BaseActivity() {
             .setTitle("Update Workout")
             .setMessage("Do you want to update this workout in the cloud as well?")
             .setPositiveButton("Update Locally & Cloud") { dialog, which ->
-                // Update both locally and in cloud
                 updateWorkoutLocally(workout, position)
                 updateWorkoutInFirestore(workout)
                 parentDialog.dismiss()
                 Toast.makeText(this, "Workout '${workout.name}' updated everywhere!", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Update Locally Only") { dialog, which ->
-                // Update only locally
                 updateWorkoutLocally(workout, position)
                 parentDialog.dismiss()
                 Toast.makeText(this, "Workout '${workout.name}' updated locally!", Toast.LENGTH_SHORT).show()
@@ -795,7 +720,7 @@ class MainActivity : BaseActivity() {
 
     private fun updateWorkoutLocally(workout: Workout, position: Int) {
         WorkoutDataManager.workouts[position] = workout
-        saveWorkoutsToLocalStorage()
+        saveWorkoutsLocal()
         workoutAdapter.notifyItemChanged(position)
     }
 
@@ -813,21 +738,19 @@ class MainActivity : BaseActivity() {
 
     private fun deleteWorkout(workout: Workout, position: Int) {
         val isUserWorkout = workout.createdBy != "Gainly"
-        // Check if this workout exists in the database (user-created workout)
+
+        // basically, if the workout exists in the cloud, delete it from there as well
+        // if local, delete it locally
         if (isUserWorkout) {
-            // Check if the workout exists in the cloud
             checkIfExistsInCloud(workout.id) { existsInCloud ->
                 if (existsInCloud) {
-                    // Show option dialog for workouts that exist in cloud
                     showDeleteOptionDialog(workout, position)
                 } else {
-                    // Delete only locally for user workouts not in cloud
                     deleteWorkoutLocally(workout, position)
                     Toast.makeText(this, "Workout '${workout.name}' deleted locally!", Toast.LENGTH_SHORT).show()
                 }
             }
         } else {
-            // For Gainly workouts, just delete locally
             deleteWorkoutLocally(workout, position)
             Toast.makeText(this, "Workout '${workout.name}' deleted locally!", Toast.LENGTH_SHORT).show()
         }
@@ -837,12 +760,10 @@ class MainActivity : BaseActivity() {
         AlertDialog.Builder(this)
             .setTitle("Delete Workout")
             .setMessage("Do you want to delete this workout from the cloud as well?")
-            .setPositiveButton("Delete Everywhere") { dialog, which ->
-                // Delete from both local and cloud
-                deleteWorkoutFromFirestore(workout, position)
+            .setPositiveButton("Delete in Cloud and Local") { dialog, which ->
+                deleteWorkoutFirestore(workout, position)
             }
             .setNegativeButton("Delete Locally Only") { dialog, which ->
-                // Delete only locally
                 deleteWorkoutLocally(workout, position)
                 Toast.makeText(this, "Workout '${workout.name}' deleted locally!", Toast.LENGTH_SHORT).show()
             }
@@ -852,19 +773,17 @@ class MainActivity : BaseActivity() {
 
     private fun deleteWorkoutLocally(workout: Workout, position: Int) {
         WorkoutDataManager.workouts.removeAt(position)
-        saveWorkoutsToLocalStorage()
+        saveWorkoutsLocal()
         workoutAdapter.notifyItemRemoved(position)
         updateNoWorkoutsHint()
     }
 
-    private fun deleteWorkoutFromFirestore(workout: Workout, position: Int) {
-        // 1. Delete from Firebase
+    private fun deleteWorkoutFirestore(workout: Workout, position: Int) {
         firestore.collection("user-saved-workouts").document(workout.id)
             .delete()
             .addOnSuccessListener {
                 Log.d("Firestore", "Workout ${workout.id} successfully deleted from cloud!")
 
-                // 2. Delete from local data manager
                 deleteWorkoutLocally(workout, position)
 
                 Toast.makeText(this, "Workout '${workout.name}' deleted everywhere!", Toast.LENGTH_SHORT).show()
@@ -890,11 +809,12 @@ class MainActivity : BaseActivity() {
         if (WorkoutDataManager.workouts.isEmpty()) {
             val sampleWorkouts = createSampleWorkouts()
             WorkoutDataManager.workouts.addAll(sampleWorkouts)
-            saveWorkoutsToLocalStorage()
+            saveWorkoutsLocal()
             workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)
         }
     }
 
+    // just sample workouts auto created on install
     private fun createSampleWorkouts(): List<Workout> {
         return listOf(
             Workout(
@@ -902,8 +822,8 @@ class MainActivity : BaseActivity() {
                 name = "Leg Day",
                 description = "Complete lower body workout",
                 exercises = listOf(
-                    createMasterExerciseList().find { it.id == "barbell_back_squat" }!!.copy(defaultSets = 4, defaultReps = 8),
-                    createMasterExerciseList().find { it.id == "romanian_deadlift" }!!.copy(defaultSets = 3, defaultReps = 10)
+                    createFullExerciseList().find { it.id == "barbell_back_squat" }!!.copy(defaultSets = 4, defaultReps = 8),
+                    createFullExerciseList().find { it.id == "romanian_deadlift" }!!.copy(defaultSets = 3, defaultReps = 10)
                 ),
                 createdBy = "Gainly"
             ),
@@ -912,15 +832,16 @@ class MainActivity : BaseActivity() {
                 name = "Upper Body",
                 description = "Chest and back focus",
                 exercises = listOf(
-                    createMasterExerciseList().find { it.id == "dumbbell_fly" }!!.copy(defaultSets = 3, defaultReps = 12),
-                    createMasterExerciseList().find { it.id == "deadlift" }!!.copy(defaultSets = 4, defaultReps = 5)
+                    createFullExerciseList().find { it.id == "dumbbell_fly" }!!.copy(defaultSets = 3, defaultReps = 12),
+                    createFullExerciseList().find { it.id == "deadlift" }!!.copy(defaultSets = 4, defaultReps = 5)
                 ),
                 createdBy = "Gainly"
             )
         )
     }
 
-    private fun createMasterExerciseList(): List<Exercise> {
+    // much better to load locally than from db
+    private fun createFullExerciseList(): List<Exercise> {
         return listOf(
             // CHEST EXERCISES
             Exercise(

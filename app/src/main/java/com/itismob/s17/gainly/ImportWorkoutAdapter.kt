@@ -33,7 +33,6 @@ class ImportWorkoutAdapter(
         holder.createdByTextView.text = "By: ${workout.createdBy}"
         holder.exerciseCountTextView.text = "${workout.exercises.size} exercises"
 
-        // Show selection state
         val isSelected = selectedWorkouts.contains(workout.id)
 
         holder.itemView.setOnClickListener {
@@ -46,25 +45,13 @@ class ImportWorkoutAdapter(
             }
             notifyItemChanged(position)
 
-            // Also show preview
             onWorkoutClick(workout)
         }
-    }
-
-    override fun getItemCount(): Int = workouts.size
-
-    fun updateWorkouts(newWorkouts: List<Workout>) {
-        workouts = newWorkouts
-        selectedWorkouts.clear()
-        notifyDataSetChanged()
     }
 
     fun getSelectedWorkouts(): List<Workout> {
         return workouts.filter { selectedWorkouts.contains(it.id) }
     }
 
-    fun clearSelection() {
-        selectedWorkouts.clear()
-        notifyDataSetChanged()
-    }
+    override fun getItemCount(): Int = workouts.size
 }

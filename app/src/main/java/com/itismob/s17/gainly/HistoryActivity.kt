@@ -41,7 +41,6 @@ class HistoryActivity : BaseActivity() {
         totalTimeSub = findViewById(R.id.totalTimeSub)
         recentWorkoutsContainer = findViewById(R.id.recentWorkoutsContainer)
 
-        // Just keep this single line
         noHistoryLayout = findViewById(R.id.noHistoryLayout)
     }
 
@@ -74,7 +73,7 @@ class HistoryActivity : BaseActivity() {
                     totalVolume += session.completedVolume
                 }
 
-                // Sort sessions by date (newest first)
+                // sorts by date (newest)
                 sessions.sortByDescending { it.date }
 
                 if (sessions.isEmpty()) {
@@ -86,7 +85,6 @@ class HistoryActivity : BaseActivity() {
             }
             .addOnFailureListener { exception ->
                 showNoHistory()
-                // You might want to show a Toast here
             }
     }
 
@@ -94,7 +92,6 @@ class HistoryActivity : BaseActivity() {
         noHistoryLayout.isVisible = true
         recentWorkoutsContainer.isVisible = false
 
-        // Reset stats to 0
         totalWorkoutsValue.text = "0"
         totalWorkoutsSub.text = "0 this week"
         totalSetsValue.text = "0"
@@ -107,10 +104,9 @@ class HistoryActivity : BaseActivity() {
         noHistoryLayout.isVisible = false
         recentWorkoutsContainer.isVisible = true
 
-        // Clear existing views
+        // clear existing views
         recentWorkoutsContainer.removeAllViews()
 
-        // Add each session to the container (similar to workout summary)
         sessions.forEach { session ->
             addSessionView(session)
         }
@@ -128,7 +124,6 @@ class HistoryActivity : BaseActivity() {
         sessionView.findViewById<TextView>(R.id.totalWeight).text = "Total Weight: ${String.format("%.1f", session.completedVolume)} kg"
         sessionView.findViewById<TextView>(R.id.completedDate).text = "Completed: ${dateFormat.format(Date(session.date))}"
 
-        // Add workout name at the top
         val workoutNameView = TextView(this).apply {
             text = session.workoutName
             textSize = 18f
@@ -141,22 +136,21 @@ class HistoryActivity : BaseActivity() {
     }
 
     private fun updateStats(totalWorkouts: Int, totalSets: Int, totalTime: Long, totalVolume: Double, sessions: List<WorkoutSessionData>) {
-        // Update total workouts
         totalWorkoutsValue.text = totalWorkouts.toString()
 
-        // Calculate workouts this week
+        // calculate workouts this week
         val currentWeek = getWeekNumber(Date())
         val workoutsThisWeek = sessions.count {
             getWeekNumber(Date(it.date)) == currentWeek
         }
         totalWorkoutsSub.text = "$workoutsThisWeek this week"
 
-        // Update total sets
+        // update total sets
         totalSetsValue.text = totalSets.toString()
         val avgSetsPerWorkout = if (totalWorkouts > 0) totalSets / totalWorkouts else 0
         totalSetsSub.text = "Avg $avgSetsPerWorkout per workout"
 
-        // Update total time
+        // update total time
         val totalTimeFormatted = formatTime(totalTime)
         totalTimeValue.text = totalTimeFormatted
 
@@ -183,24 +177,3 @@ class HistoryActivity : BaseActivity() {
         return calendar.get(java.util.Calendar.WEEK_OF_YEAR)
     }
 }
-
-// Data class to match Firebase structure
-data class WorkoutSessionData(
-    val id: String = "",
-    val userId: String = "",
-    val userEmail: String = "",
-    val workoutId: String = "",
-    val workoutName: String = "",
-    val date: Long = 0,
-    val duration: Long = 0,
-    val completed: Boolean = false,
-    val completedVolume: Double = 0.0,
-    val completedSets: Int = 0,
-    val completedReps: Int = 0,
-    val totalSets: Int = 0,
-    val totalVolume: Double = 0.0,
-    val notes: String = "",
-    val timestamp: Long = 0,
-    val exerciseCount: Int = 0,
-    val exerciseSessions: List<Map<String, Any>> = emptyList()
-)

@@ -32,6 +32,15 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.finish_workout_summary)
+
+        initViews()
+        loadWorkoutSession()
+        setupClickListeners()
+    }
+
     private val takeImageResult = registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
         if (isSuccess) {
             latestTmpUri?.let { uri ->
@@ -41,15 +50,6 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Image capture cancelled.", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.finish_workout_summary)
-
-        initViews()
-        loadWorkoutSession()
-        setupClickListeners()
     }
 
     private fun initViews() {
@@ -73,22 +73,24 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
 
     private fun displayWorkoutSummary() {
         currentSession?.let { session ->
-            // Calculate ACTUAL completed workout stats
             val completedSets = session.exerciseSessions.sumOf { ex ->
                 ex.sets.count { it.completed }
             }
-            val totalSets = session.exerciseSessions.sumOf { it.sets.size }
+
+            val totalSets = session.exerciseSessions.sumOf {
+                it.sets.size
+            }
+
             val completedReps = session.exerciseSessions.sumOf { ex ->
                 ex.sets.filter { it.completed }.sumOf { it.reps }
             }
+
             val completedWeight = session.exerciseSessions.sumOf { ex ->
                 ex.sets.filter { it.completed }.sumOf { it.getVolume() }
             }
 
-            // Display workout stats - show ACTUAL completed values
             val totalTime = formatTime(session.duration)
 
-            // Create workout stats view
             val statsView = layoutInflater.inflate(R.layout.item_workout_stats, exercisesSummaryContainer, false)
 
             statsView.findViewById<TextView>(R.id.totalTime).text = "Total Time: $totalTime"
@@ -101,17 +103,15 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
 
             exercisesSummaryContainer.addView(statsView)
 
-            // Display exercises summary - only show completed exercises/sets
+            // only show completed sets and exercises
             session.exerciseSessions.forEach { exerciseSession ->
-                // Only show exercises that have at least one completed set
                 val exerciseCompletedSets = exerciseSession.sets.count { it.completed }
                 if (exerciseCompletedSets > 0) {
                     addExerciseSummaryView(exerciseSession)
                 }
             }
 
-            // Update motivational text based on actual performance
-            updateMotivationalText(completedSets, totalSets)
+            updateDescText(completedSets, totalSets)
         }
     }
 
@@ -121,7 +121,6 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
 
         exerciseView.findViewById<TextView>(R.id.exerciseName).text = exerciseSession.exerciseName
 
-        // Calculate ACTUAL completed stats for this exercise
         val completedSets = exerciseSession.sets.count { it.completed }
         val totalSets = exerciseSession.sets.size
         val completedReps = exerciseSession.sets.filter { it.completed }.sumOf { it.reps }
@@ -132,7 +131,6 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
 
         val setsContainer = exerciseView.findViewById<LinearLayout>(R.id.setsContainer)
 
-        // Add individual set details - only show completed sets
         exerciseSession.sets.forEach { set ->
             if (set.completed) {
                 addSetSummaryView(setsContainer, set)
@@ -153,8 +151,10 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
         setsContainer.addView(setView)
     }
 
-    private fun updateMotivationalText(completedSets: Int, totalSets: Int) {
+    private fun updateDescText(completedSets: Int, totalSets: Int) {
         val completionRate = if (totalSets > 0) completedSets.toDouble() / totalSets else 0.0
+
+        // just updates the desc text based on the completion rate
 
         when {
             completionRate == 1.0 -> {
@@ -196,7 +196,7 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
                 }
                 startActivity(Intent.createChooser(shareIntent, "Share your workout photo"))
             } ?: run {
-                // Share workout summary without image
+                // if no image is captured, share text only
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, generateShareText())
@@ -234,10 +234,10 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
 
     private fun saveWorkoutData() {
         currentSession?.let { session ->
-            // Save locally
+            // saves locally
             saveWorkoutLocally(session)
 
-            // Save to Firebase
+            // saves to Firebase
             saveWorkoutToFirebase(session)
         }
     }
@@ -247,11 +247,11 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
             val sharedPref = getSharedPreferences("workout_data", MODE_PRIVATE)
             val editor = sharedPref.edit()
 
-            // Convert session to JSON
+            // convert session to JSON
             val sessionJson = convertSessionToJson(session)
             editor.putString(session.id, sessionJson.toString())
 
-            // Save session IDs list
+            // save session IDs list
             val savedSessions = sharedPref.getStringSet("saved_sessions", mutableSetOf()) ?: mutableSetOf()
             savedSessions.add(session.id)
             editor.putStringSet("saved_sessions", savedSessions)
@@ -328,7 +328,6 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
         val userEmail = currentUser?.email ?: "unknown"
         val userId = currentUser?.uid ?: "unknown"
 
-        // Calculate ACTUAL completed workout stats (only counting completed sets)
         val completedSets = session.exerciseSessions.sumOf { ex ->
             ex.sets.count { it.completed }
         }
@@ -340,7 +339,6 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
             ex.sets.filter { it.completed }.sumOf { it.getVolume() }
         }
 
-        // Calculate exercise-specific completed stats
         val exerciseSessionsData = session.exerciseSessions.map { exercise ->
             val exerciseCompletedSets = exercise.sets.count { it.completed }
             val exerciseTotalSets = exercise.sets.size
@@ -355,13 +353,11 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
                 "targetWeight" to exercise.targetWeight,
                 "completed" to exercise.completed,
 
-                // ACTUAL completed values for this exercise
                 "completedSets" to exerciseCompletedSets,
                 "totalSets" to exerciseTotalSets,
                 "completedReps" to exerciseCompletedReps,
                 "completedVolume" to exerciseCompletedVolume,
 
-                // Legacy field (total volume of ALL sets - keep for backward compatibility)
                 "totalVolume" to exercise.getTotalVolume(),
 
                 "sets" to exercise.sets.map { set ->
@@ -387,14 +383,12 @@ class FinishWorkoutSummaryActivity : AppCompatActivity() {
             "duration" to session.duration,
             "completed" to session.completed,
 
-            // ACTUAL completed workout totals
             "completedVolume" to completedWeight,
             "completedSets" to completedSets,
             "completedReps" to completedReps,
 
-            // Total counts (all sets, including uncompleted)
             "totalSets" to totalSets,
-            "totalVolume" to session.totalVolume, // This includes uncompleted sets
+            "totalVolume" to session.totalVolume,
 
             "notes" to session.notes,
             "timestamp" to System.currentTimeMillis(),

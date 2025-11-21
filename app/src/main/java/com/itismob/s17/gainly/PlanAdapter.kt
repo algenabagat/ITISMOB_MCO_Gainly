@@ -53,7 +53,6 @@ class PlanAdapter(
         val popup = PopupMenu(view.context, view)
         popup.menuInflater.inflate(R.menu.plan_option, popup.menu)
 
-        // popup menu logic for edit and delete not needed yet
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.editPlan -> {

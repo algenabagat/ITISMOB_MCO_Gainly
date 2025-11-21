@@ -19,7 +19,6 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.register)
 
-        // Initialize Firebase Auth and Firestore
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
@@ -89,7 +88,7 @@ class RegisterActivity : AppCompatActivity() {
                     user?.updateProfile(profileUpdates)?.addOnCompleteListener { profileTask ->
                         // just tries to save to firestore
                         try {
-                            saveUserToFirestore(user.uid, email, username)
+                            saveUserToFirestore(user.uid, email, username, password)
                         } catch (e: Exception) {
                             android.util.Log.e("RegisterActivity", "Firestore save failed: ${e.message}")
                         }
@@ -105,12 +104,12 @@ class RegisterActivity : AppCompatActivity() {
             }
     }
 
-    private fun saveUserToFirestore(uid: String, email: String, username: String) {
+    private fun saveUserToFirestore(uid: String, email: String, username: String, password: String) {
         val userData = hashMapOf(
             "email" to email,
             "username" to username,
             "createdAt" to com.google.firebase.Timestamp.now(),
-            // !! could store other data here
+            "password" to password // MIGHT be very risky to do, idk if we should keep this
         )
 
         db.collection("users").document(uid).set(userData)

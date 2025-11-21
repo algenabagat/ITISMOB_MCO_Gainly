@@ -16,7 +16,7 @@ data class Exercise(
 ) : Serializable {
 
     constructor() : this("", "", "", "", "", 3, 10)
-    // Helper to create consistent IDs
+
     companion object {
         fun generateId(): String = "exercise_${System.currentTimeMillis()}"
     }

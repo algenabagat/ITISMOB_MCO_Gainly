@@ -16,7 +16,6 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
 
-        // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
         setupClickListeners()
@@ -60,12 +59,12 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Login successful
+                    // login successful
                     Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 } else {
-                    // Login failed
+                    // login failed
                     Toast.makeText(
                         this,
                         "Login failed: ${task.exception?.message}",
