@@ -48,10 +48,9 @@ class WorkoutAdapter(
 
         updateFavoriteButtonIcon(holder.favoriteBtn, workout.isFavorite)
 
-        // Pass position to favorite toggle
         holder.favoriteBtn.setOnClickListener {
             val newFavoriteState = !workout.isFavorite
-            onFavoriteToggle(workout, newFavoriteState) // Pass position instead of workout
+            onFavoriteToggle(workout, newFavoriteState)
             updateFavoriteButtonIcon(holder.favoriteBtn, newFavoriteState)
         }
 
@@ -71,9 +70,8 @@ class WorkoutAdapter(
             holder.exercisesLayout.addView(exerciseView)
         }
 
-        // Pass position to start workout
         holder.startBtn.setOnClickListener {
-            onStartWorkout(workout) // Pass position instead of workout
+            onStartWorkout(workout)
         }
 
         holder.optionsBtn.setOnClickListener { view ->
