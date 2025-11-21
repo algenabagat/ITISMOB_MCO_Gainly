@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="300dp" android:layout_height="wrap_content"
-    android:background="@drawable/rounded_background" android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/white_rounded_container"
+    android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView android:id="@+id/dialogTitle" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:layout_marginBottom="16dp"
-        android:text="Select Workout" android:textColor="@android:color/black"
-        android:textSize="20sp" android:textStyle="bold" />
+    <TextView
+        android:id="@+id/dialogTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Select Workout"
+        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-    <androidx.recyclerview.widget.RecyclerView android:id="@+id/workoutsRecyclerView"
-        android:layout_width="match_parent" android:layout_height="300dp" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/workoutsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="300dp" />
 
 </LinearLayout>
