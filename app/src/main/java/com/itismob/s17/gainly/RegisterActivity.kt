@@ -106,10 +106,10 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun saveUserToFirestore(uid: String, email: String, username: String, password: String) {
         val userData = hashMapOf(
+            "uid" to uid,
             "email" to email,
             "username" to username,
             "createdAt" to com.google.firebase.Timestamp.now(),
-            "password" to password // MIGHT be very risky to do, idk if we should keep this
         )
 
         db.collection("users").document(uid).set(userData)
