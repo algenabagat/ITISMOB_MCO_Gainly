@@ -244,10 +244,10 @@ class PlanActivity : BaseActivity(), DatePickerFragment.OnDateSelectedListener, 
 
     private fun startPlan(plan: Plan) {
         val workoutPosition = WorkoutDataManager.workouts.indexOfFirst { it.id == plan.workout.id }
-
         if (workoutPosition != -1) {
-            val intent = Intent(this, WorkoutTrackingActivity::class.java)
+            val intent = Intent(this, PlannedWorkoutTrackingActivity::class.java)
             intent.putExtra("workout_position", workoutPosition)
+            intent.putExtra("plan_id_to_delete", plan.id)
             startActivity(intent)
         } else {
             Toast.makeText(this, "Could not find workout to start.", Toast.LENGTH_SHORT).show()

@@ -37,6 +37,8 @@
         <activity android:name=".PlanActivity" />
         <activity android:name=".HistoryActivity"/>
         <activity android:name=".WorkoutTrackingActivity" />
+        <activity android:name=".PlannedWorkoutTrackingActivity"
+        android:exported="false" />
         <activity android:name=".FinishWorkoutSummaryActivity"/>
 
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
