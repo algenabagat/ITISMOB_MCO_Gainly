@@ -1,6 +1,7 @@
 package com.itismob.s17.gainly
 
 import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
@@ -10,8 +11,16 @@ object PlanStorageManager {
     private const val PREFS_NAME = "GainlyPlanPrefs"
     private const val PLANS_KEY = "user_plans"
 
+    private fun getPlansKey(context: Context): String {
+        val auth = FirebaseAuth.getInstance()
+        val currentUser = auth.currentUser
+        val userId = currentUser?.uid ?: "unknown_user"
+        return "${PLANS_KEY}$userId"
+    }
+
     fun savePlans(context: Context, plans: List<Plan>) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val plansKey = getPlansKey(context)
         val jsonArray = JSONArray()
 
         plans.forEach { plan ->
@@ -27,12 +36,13 @@ object PlanStorageManager {
             jsonArray.put(planObject)
         }
 
-        prefs.edit().putString(PLANS_KEY, jsonArray.toString()).apply()
+        prefs.edit().putString(plansKey, jsonArray.toString()).apply()
     }
 
     fun loadPlans(context: Context): ArrayList<Plan> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val jsonString = prefs.getString(PLANS_KEY, null)
+        val plansKey = getPlansKey(context)
+        val jsonString = prefs.getString(plansKey, null)
         val plans = ArrayList<Plan>()
 
         if (jsonString != null) {
