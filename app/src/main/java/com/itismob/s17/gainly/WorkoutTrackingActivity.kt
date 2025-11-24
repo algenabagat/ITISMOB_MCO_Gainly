@@ -137,14 +137,10 @@ class WorkoutTrackingActivity : AppCompatActivity() {
         repsEditText.setText(if (setRecord.reps > 0) setRecord.reps.toString() else exerciseSession.targetReps.toString())
         completedCheckbox.isChecked = setRecord.completed
 
-        println("DEBUG: Initializing set ${setRecord.setNumber} - completed: ${setRecord.completed}")
-
         val updateSetRecord: () -> Unit = {
             val weight = weightEditText.text.toString().toDoubleOrNull() ?: 0.0
             val reps = repsEditText.text.toString().toIntOrNull() ?: 0
             val isChecked = completedCheckbox.isChecked
-
-            println("DEBUG: Updating set ${setRecord.setNumber} - completed: $isChecked")
 
             currentSession.exerciseSessions[exerciseIndex].sets[setIndex].apply {
                 this.weight = weight
@@ -153,7 +149,6 @@ class WorkoutTrackingActivity : AppCompatActivity() {
             }
 
             val updatedSet = currentSession.exerciseSessions[exerciseIndex].sets[setIndex]
-            println("DEBUG: Set ${updatedSet.setNumber} verified - completed: ${updatedSet.completed}")
 
             checkWorkoutCompletionState()
         }

@@ -88,6 +88,12 @@ class MainActivity : BaseActivity() {
         recyclerView.adapter = workoutAdapter
     }
 
+    private fun getWorkoutsKey(): String {
+        val currentUser = auth.currentUser
+        val userId = currentUser?.uid ?: "unknown_user"
+        return "${KEY_USER_WORKOUTS}$userId"
+    }
+
     private fun updateNoWorkoutsHint() {
         if (WorkoutDataManager.workouts.isEmpty()) {
             noWorkoutsHint.visibility = View.VISIBLE
@@ -245,7 +251,8 @@ class MainActivity : BaseActivity() {
     }
 
     private fun loadWorkoutsLocal() {
-        val workoutsJson = sharedPreferences.getString(KEY_USER_WORKOUTS, null)
+        val workoutsKey = getWorkoutsKey()
+        val workoutsJson = sharedPreferences.getString(workoutsKey, null)
 
         if (workoutsJson.isNullOrEmpty()) {
             loadSampleWorkouts()
@@ -259,8 +266,9 @@ class MainActivity : BaseActivity() {
     }
 
     private fun saveWorkoutsLocal() {
+        val workoutsKey = getWorkoutsKey()
         val workoutsJson = convertWorkoutsToJson(WorkoutDataManager.workouts)
-        sharedPreferences.edit().putString(KEY_USER_WORKOUTS, workoutsJson).apply()
+        sharedPreferences.edit().putString(workoutsKey, workoutsJson).apply()
     }
 
     private fun convertWorkoutsToJson(workouts: List<Workout>): String {
@@ -549,6 +557,12 @@ class MainActivity : BaseActivity() {
         if (position != -1) {
             val updatedWorkout = workout.copy(isFavorite = isFavorite)
             WorkoutDataManager.workouts[position] = updatedWorkout
+
+            if (isFavorite) {
+                WorkoutDataManager.workouts.removeAt(position)
+                WorkoutDataManager.workouts.add(0, updatedWorkout)
+            }
+
             saveWorkoutsLocal()
 
             workoutAdapter.updateWorkouts(WorkoutDataManager.workouts)

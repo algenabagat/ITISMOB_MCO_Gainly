@@ -294,7 +294,6 @@ class ProfileActivity : AppCompatActivity() {
                 changePass1Tx.text.clear()
                 changePass2Tx.text.clear()
 
-                android.util.Log.e("ProfileActivity", "Firestore sync failed but Auth updated: ${e.message}")
             }
     }
 
